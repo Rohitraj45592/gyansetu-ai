@@ -61,10 +61,11 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-      <main className="flex-1 min-w-0 flex flex-col" style={{ height: '100vh', paddingTop: '56px' }}>
+      <main className="flex-1 min-w-0 flex flex-col" style={{ minHeight: '100vh' }}>
+        <div style={{ height: '56px', flexShrink: 0 }} />
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-10 pb-6 space-y-4" style={{ paddingTop: '24px' }}>
+        <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-6 pb-6 space-y-4">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
