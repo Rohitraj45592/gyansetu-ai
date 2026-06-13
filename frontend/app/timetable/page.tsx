@@ -56,7 +56,7 @@ export default function TimetablePage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-      <main style={{ flex: 1, marginLeft: '256px', padding: '40px 56px', minWidth: 0, width: 'calc(100% - 256px)' }}>
+      <main className="flex-1 min-w-0 pt-20 px-4 pb-8 lg:pt-10 lg:px-14 lg:ml-64 lg:w-[calc(100%-256px)]">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}

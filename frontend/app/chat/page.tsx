@@ -61,7 +61,7 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-      <main style={{ flex: 1, marginLeft: '256px', padding: '0', minWidth: 0, width: 'calc(100% - 256px)' }}
+      <main className="flex-1 min-w-0 flex flex-col h-screen pt-14 lg:pt-0 lg:ml-64 lg:w-[calc(100%-256px)]">
         className="flex flex-col h-screen">
 
         {/* Header */}
