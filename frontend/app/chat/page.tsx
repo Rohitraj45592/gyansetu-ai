@@ -63,20 +63,7 @@ export default function ChatPage() {
 
      <main className="flex-1 min-w-0 flex flex-col h-screen" style={{ paddingTop: '56px' }}>
 
-        {/* Header */}
-      <div className="px-4 sm:px-10 py-4 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-              <Sparkles size={18} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">GyanSetu AI</h1>
-              <p className="text-xs text-gray-400">Ask anything about your academics</p>
-            </div>
-          </div>
-        </div>
-
+    
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-8 pb-6 space-y-4">
           {messages.map((msg, i) => (
