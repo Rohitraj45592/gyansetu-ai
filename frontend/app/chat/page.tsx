@@ -64,7 +64,7 @@ export default function ChatPage() {
       <main className="flex-1 min-w-0 flex flex-col h-screen pt-14">
 
         {/* Header */}
-        <div className="px-4 sm:px-10 py-6 border-b border-gray-100 bg-white">
+       <div className="px-4 sm:px-10 py-4 border-b border-gray-100 bg-white relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
