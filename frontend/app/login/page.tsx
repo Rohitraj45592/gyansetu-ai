@@ -15,7 +15,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await axios.post('http://127.0.0.1:8001/auth/login', { email, password })
+      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', { email, password })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')

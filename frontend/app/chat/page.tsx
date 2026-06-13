@@ -45,7 +45,7 @@ export default function ChatPage() {
 
     try {
       const studentId = localStorage.getItem('student_id') || '1'
-      const res = await axios.post('http://127.0.0.1:8001/chat/', {
+      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/chat/', {
         question: text,
         student_id: parseInt(studentId)
       })

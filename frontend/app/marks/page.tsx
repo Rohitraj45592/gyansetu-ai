@@ -23,7 +23,7 @@ export default function MarksPage() {
   const fetchData = async () => {
     try {
       const studentId = localStorage.getItem('student_id') || '1'
-      const res = await axios.get(`http://127.0.0.1:8001/marks/${studentId}`)
+      const res = await axios.get(`https://gyansetu-ai-production.up.railway.app/marks/${studentId}`)
       setMarks(res.data.marks || [])
     } catch (err) {
       console.error(err)

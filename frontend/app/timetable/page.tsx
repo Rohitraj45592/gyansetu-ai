@@ -22,7 +22,7 @@ export default function TimetablePage() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8001/timetable/3`)
+      const res = await axios.get(`https://gyansetu-ai-production.up.railway.app/timetable/3`)
       setTimetable(res.data.timetable || [])
     } catch (err) {
       console.error(err)

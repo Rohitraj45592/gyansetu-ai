@@ -23,7 +23,7 @@ export default function AttendancePage() {
   const fetchData = async () => {
     try {
       const studentId = localStorage.getItem('student_id') || '1'
-      const res = await axios.get(`http://127.0.0.1:8001/attendance/${studentId}`)
+      const res = await axios.get(`https://gyansetu-ai-production.up.railway.app/attendance/${studentId}`)
       setAttendance(res.data.attendance || [])
     } catch (err) {
       console.error(err)

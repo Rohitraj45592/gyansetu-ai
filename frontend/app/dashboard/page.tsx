@@ -31,8 +31,8 @@ export default function DashboardPage() {
     try {
       const studentId = localStorage.getItem('student_id') || '1'
       const [attRes, marksRes] = await Promise.all([
-        axios.get(`http://127.0.0.1:8001/attendance/${studentId}`),
-        axios.get(`http://127.0.0.1:8001/marks/${studentId}`)
+        axios.get(`https://gyansetu-ai-production.up.railway.app/attendance/${studentId}`),
+        axios.get(`https://gyansetu-ai-production.up.railway.app/marks/${studentId}`)
       ])
       setAttendance(attRes.data.attendance || [])
       setMarks(marksRes.data.marks || [])
