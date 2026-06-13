@@ -1,9 +1,5 @@
 @import "tailwindcss";
-@media (max-width: 1023px) {
-  aside.fixed {
-    transform: translateX(-100%);
-  }
-}
+
 
 * {
   margin: 0;
