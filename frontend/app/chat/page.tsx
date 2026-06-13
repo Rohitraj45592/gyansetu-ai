@@ -2,7 +2,7 @@
 import ReactMarkdown from 'react-markdown'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import axios from 'axios'
 import { Send, Sparkles, User } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
@@ -61,10 +61,10 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-    <main className="flex-1 min-w-0 flex flex-col h-screen pt-14">
+      <main className="flex-1 min-w-0 flex flex-col h-screen pt-14">
 
         {/* Header */}
-        <div className="px-10 py-6 border-b border-gray-100 bg-white">
+        <div className="px-4 sm:px-10 py-6 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
@@ -78,14 +78,14 @@ export default function ChatPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-10 py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-10 py-6 space-y-4">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex gap-3 max-w-2xl ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
+              className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
 
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 msg.role === 'ai' ? '' : 'bg-gray-200'
@@ -96,14 +96,14 @@ export default function ChatPage() {
                   : <User size={14} className="text-gray-500" />}
               </div>
 
-              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-  msg.role === 'ai'
-    ? 'bg-white border border-gray-100 text-gray-800 shadow-sm prose prose-sm max-w-none'
-    : 'text-white whitespace-pre-line'
-}`}
-  style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #6366f1, #818cf8)' } : {}}>
-  {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
-</div>
+              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
+                msg.role === 'ai'
+                  ? 'bg-white border border-gray-100 text-gray-800 shadow-sm prose prose-sm max-w-none'
+                  : 'text-white whitespace-pre-line'
+              }`}
+                style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #6366f1, #818cf8)' } : {}}>
+                {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
+              </div>
             </motion.div>
           ))}
 
@@ -111,7 +111,7 @@ export default function ChatPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex gap-3 max-w-2xl">
+              className="flex gap-3 w-full sm:max-w-[85%]">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
                 <Sparkles size={14} className="text-white" />
@@ -133,7 +133,7 @@ export default function ChatPage() {
 
         {/* Suggestions */}
         {messages.length === 1 && (
-          <div className="px-10 pb-3 flex flex-wrap gap-2">
+          <div className="px-4 sm:px-10 pb-3 flex flex-wrap gap-2">
             {suggestions.map((s, i) => (
               <motion.button
                 key={i}
@@ -149,8 +149,8 @@ export default function ChatPage() {
         )}
 
         {/* Input */}
-        <div className="px-10 py-5 border-t border-gray-100 bg-white">
-          <div className="flex items-center gap-3 max-w-3xl">
+        <div className="px-4 sm:px-10 py-5 border-t border-gray-100 bg-white">
+          <div className="flex items-center gap-3 w-full">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
