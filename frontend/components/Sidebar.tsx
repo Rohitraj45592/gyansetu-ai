@@ -31,7 +31,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile top bar - only visible on small screens */}
+      {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-40">
         <button
           onClick={() => setOpen(true)}
@@ -59,7 +59,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-100
+          fixed top-0 left-0 h-full w-72 bg-[#171717] border-r border-[#2a2a2a]
           flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0
@@ -72,11 +72,11 @@ export default function Sidebar() {
               style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
               <span className="text-base">🎓</span>
             </div>
-            <span className="font-semibold text-gray-900">GyanSetu AI</span>
+            <span className="font-semibold text-white">GyanSetu AI</span>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50">
+            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5">
             <PanelLeft size={18} />
           </button>
         </div>
@@ -88,8 +88,8 @@ export default function Sidebar() {
               onClick={() => handleNav(item.path)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 pathname === item.path
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-white/10 text-white'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}>
               <item.icon size={18} />
               {item.label}
@@ -97,10 +97,10 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-gray-100 mx-3 mb-3" style={{ borderTopWidth: '1px' }}>
+        <div className="px-3 py-4 mx-3 mb-3 border-t border-[#2a2a2a]">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all -mx-3">
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all -mx-3">
             <LogOut size={18} />
             Logout
           </button>
