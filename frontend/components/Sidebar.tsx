@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarCheck, GraduationCap, Clock,
-  MessageCircle, LogOut, Menu, X
+  MessageCircle, LogOut, PanelLeft
 } from 'lucide-react'
 
 export default function Sidebar() {
@@ -31,27 +31,27 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile top bar with hamburger */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-            <span className="text-sm">🎓</span>
-          </div>
-          <span className="font-semibold text-gray-900 text-sm">GyanSetu AI</span>
-        </div>
+      {/* Top bar - always visible */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
         <button
           onClick={() => setOpen(true)}
           className="p-2 rounded-lg hover:bg-gray-100 text-gray-700"
           aria-label="Open menu">
-          <Menu size={24} />
+          <PanelLeft size={22} />
         </button>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-gray-900 text-sm">GyanSetu AI</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+            <span className="text-sm">🎓</span>
+          </div>
+        </div>
       </div>
 
-      {/* Dark overlay when sidebar open on mobile */}
+      {/* Dark overlay when sidebar open */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-50"
+          className="fixed inset-0 bg-black/50 z-50"
           onClick={() => setOpen(false)}
         />
       )}
@@ -59,11 +59,10 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 right-0 h-full w-64 bg-white border-l border-gray-200
+          fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200
           flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
-          ${open ? 'translate-x-0' : 'translate-x-full'}
-          md:translate-x-0 md:left-0 md:right-auto md:border-r md:border-l-0
+          ${open ? 'translate-x-0' : '-translate-x-full'}
         `}>
 
         <div className="px-6 py-6 flex items-center justify-between border-b border-gray-200">
@@ -76,8 +75,8 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="md:hidden p-1 text-gray-500 hover:text-gray-800">
-            <X size={22} />
+            className="p-1 text-gray-500 hover:text-gray-800">
+            <PanelLeft size={20} />
           </button>
         </div>
 

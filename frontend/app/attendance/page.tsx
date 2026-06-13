@@ -51,7 +51,7 @@ export default function AttendancePage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-     <main className="flex-1 min-w-0 pt-20 px-4 pb-8 md:pt-10 md:px-14 md:ml-64 md:w-[calc(100%-256px)]">
+<main className="flex-1 min-w-0 pt-20 px-4 pb-8 sm:px-8 lg:px-14">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
