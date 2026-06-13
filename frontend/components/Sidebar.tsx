@@ -59,11 +59,11 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200
+          fixed top-0 right-0 h-full w-64 bg-white border-l border-gray-200
           flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
-          ${open ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0
+          ${open ? 'translate-x-0' : 'translate-x-full'}
+          md:translate-x-0 md:left-0 md:right-auto md:border-r md:border-l-0
         `}>
 
         <div className="px-6 py-6 flex items-center justify-between border-b border-gray-200">
