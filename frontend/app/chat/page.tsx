@@ -61,7 +61,7 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-      <main className="flex-1 min-w-0 flex flex-col h-screen pt-14">
+      <main className="flex-1 min-w-0 flex flex-col h-screen pt-16">
 
         {/* Header */}
        <div className="px-4 sm:px-10 py-4 border-b border-gray-100 bg-white relative z-10">
@@ -78,7 +78,7 @@ export default function ChatPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-10 py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-8 pb-6 space-y-4">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
