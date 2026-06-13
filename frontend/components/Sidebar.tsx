@@ -59,49 +59,50 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-72 bg-[#171717] border-r border-[#2a2a2a]
+          fixed top-0 left-0 h-full w-[280px] bg-[#171717]
           flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
           lg:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}>
 
-        <div className="px-5 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-              <span className="text-base">🎓</span>
-            </div>
-            <span className="font-semibold text-white">GyanSetu AI</span>
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 px-5 pt-6 pb-8">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+            <span className="text-base">🎓</span>
           </div>
+          <span className="text-[17px] font-semibold text-white tracking-tight">GyanSetu AI</span>
           <button
             onClick={() => setOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5">
+            className="lg:hidden ml-auto p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5">
             <PanelLeft size={18} />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 pt-2 space-y-0.5 overflow-y-auto">
+        {/* Nav */}
+        <nav className="flex-1 px-3 space-y-1">
           {navItems.map((item) => (
             <button
               key={item.label}
               onClick={() => handleNav(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-colors ${
                 pathname === item.path
                   ? 'bg-white/10 text-white'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  : 'text-gray-300 hover:bg-white/5 hover:text-white'
               }`}>
-              <item.icon size={18} />
+              <item.icon size={19} strokeWidth={1.8} className="flex-shrink-0" />
               {item.label}
             </button>
           ))}
         </nav>
 
-        <div className="px-3 py-4 mx-3 mb-3 border-t border-[#2a2a2a]">
+        {/* Footer */}
+        <div className="px-3 pb-5">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all -mx-3">
-            <LogOut size={18} />
+            className="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-[15px] font-medium text-gray-400 hover:bg-white/5 hover:text-red-400 transition-colors">
+            <LogOut size={19} strokeWidth={1.8} className="flex-shrink-0" />
             Logout
           </button>
         </div>
