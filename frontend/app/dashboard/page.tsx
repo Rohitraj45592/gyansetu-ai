@@ -68,7 +68,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
 
-<main className="flex-1 min-w-0 px-4 pb-8 sm:px-8 lg:px-14 pt-16 lg:pt-8" style={{ marginLeft: '80px' }}>
+<main className="flex-1 min-w-0 px-4 pb-8 sm:px-8 lg:px-14 pt-16 lg:pt-8 lg:ml-20">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
