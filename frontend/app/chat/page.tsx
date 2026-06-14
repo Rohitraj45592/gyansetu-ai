@@ -60,7 +60,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
       <Sidebar />
-<main className="flex-1 min-w-0 flex flex-col h-screen lg:pt-0" style={{ marginLeft: '80px', paddingTop: '80px' }}>
+<main className="flex-1 min-w-0 flex flex-col h-screen" style={{ marginLeft: '80px', paddingTop: '72px' }}>
         <div style={{ height: '56px', flexShrink: 0 }} />
 
         {/* Messages */}
