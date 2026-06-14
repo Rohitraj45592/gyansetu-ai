@@ -31,6 +31,9 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Desktop spacer - pushes content right of rail */}
+      <div style={{ width: '64px', flexShrink: 0 }} className="hidden lg:block" />
+
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-40">
         <button
@@ -48,7 +51,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Desktop icon rail - always visible */}
+      {/* Desktop icon rail */}
       <aside className="hidden lg:flex fixed top-0 left-0 h-full w-16 bg-[#0f1117] flex-col items-center py-6 z-40">
         <button
           onClick={() => setOpen(true)}
@@ -111,7 +114,6 @@ export default function Sidebar() {
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}>
 
-        {/* Branding */}
         <div className="flex items-center justify-between px-6 pt-8 pb-8">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
@@ -130,7 +132,6 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 px-4 space-y-2.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.path
@@ -148,18 +149,13 @@ export default function Sidebar() {
                     : 'text-gray-400 hover:bg-white/[0.06] hover:text-white'
                   }
                 `}>
-                <item.icon
-                  size={23}
-                  strokeWidth={isActive ? 2.2 : 1.8}
-                  className="flex-shrink-0"
-                />
+                <item.icon size={23} strokeWidth={isActive ? 2.2 : 1.8} className="flex-shrink-0" />
                 {item.label}
               </button>
             )
           })}
         </nav>
 
-        {/* Footer */}
         <div className="px-4 py-6 border-t border-white/[0.06] mx-4">
           <button
             onClick={handleLogout}
