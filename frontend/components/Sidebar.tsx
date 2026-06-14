@@ -74,8 +74,8 @@ export default function Sidebar() {
               style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
               <span className="text-2xl">🎓</span>
             </div>
-            <span className="text-[28px] font-extrabold text-white tracking-tight leading-none">
-              GyanSetu
+            <span className="text-[24px] font-extrabold text-white tracking-tight leading-none">
+              GyanSetu AI
             </span>
           </div>
           <button
