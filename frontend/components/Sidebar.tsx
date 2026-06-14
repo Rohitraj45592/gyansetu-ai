@@ -31,8 +31,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Top bar - all devices */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-40">
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-40">
         <button
           onClick={() => setOpen(true)}
           className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors -ml-1"
@@ -48,6 +48,50 @@ export default function Sidebar() {
         </div>
       </div>
 
+      {/* Desktop icon rail - always visible */}
+      <aside className="hidden lg:flex fixed top-0 left-0 h-full w-16 bg-[#0f1117] flex-col items-center py-6 z-40">
+        <button
+          onClick={() => setOpen(true)}
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors mb-6"
+          aria-label="Expand menu">
+          <PanelLeft size={20} />
+        </button>
+
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-6 flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+          <span className="text-lg">🎓</span>
+        </div>
+
+        <nav className="flex-1 flex flex-col items-center gap-2">
+          {navItems.map((item) => {
+            const isActive = pathname === item.path
+            return (
+              <button
+                key={item.label}
+                onClick={() => handleNav(item.path)}
+                title={item.label}
+                className={`
+                  w-11 h-11 rounded-xl flex items-center justify-center
+                  transition-all duration-200
+                  ${isActive
+                    ? 'bg-white/10 text-white'
+                    : 'text-gray-400 hover:bg-white/[0.06] hover:text-white'
+                  }
+                `}>
+                <item.icon size={22} strokeWidth={isActive ? 2.2 : 1.8} />
+              </button>
+            )
+          })}
+        </nav>
+
+        <button
+          onClick={handleLogout}
+          title="Logout"
+          className="w-11 h-11 rounded-xl flex items-center justify-center text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200">
+          <LogOut size={22} strokeWidth={1.8} />
+        </button>
+      </aside>
+
       {/* Dark overlay */}
       {open && (
         <div
@@ -56,7 +100,7 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Expanded Sidebar / Mobile drawer */}
       <aside
         className={`
           fixed top-0 left-0 h-full bg-[#0f1117]
