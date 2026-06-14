@@ -31,8 +31,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-40">
+      {/* Top bar - all devices */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-40">
         <button
           onClick={() => setOpen(true)}
           className="p-2 rounded-lg hover:bg-gray-50 text-gray-600 -ml-2"
@@ -48,10 +48,10 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Dark overlay - mobile only */}
+      {/* Dark overlay */}
       {open && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 bg-black/40 z-40"
           onClick={() => setOpen(false)}
         />
       )}
@@ -62,7 +62,6 @@ export default function Sidebar() {
           fixed top-0 left-0 h-full w-72 bg-[#171717] border-r border-[#2a2a2a]
           flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}>
 
@@ -76,7 +75,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5">
+            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5">
             <PanelLeft size={18} />
           </button>
         </div>
