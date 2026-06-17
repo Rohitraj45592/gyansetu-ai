@@ -176,9 +176,10 @@ export default function Home() {
                 🔵 Continue with Google
               </button>
 
-              <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: '#9CA3AF' }}>
-                Don't have an account? <a href="#" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 700 }}>Create one here</a>
-              </div>
+              <div style={{ textAlign: 'center', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(139,92,246,0.1)', fontSize: '11px', color: '#6B7280', lineHeight: 1.6 }}>
+  <strong style={{ color: '#9CA3AF', display: 'block', marginBottom: '4px' }}>Demo Credentials:</strong>
+  rohit.student@gyansetu.com / rohit123
+</div>
             </form>
           </div>
         </div>

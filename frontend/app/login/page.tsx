@@ -57,9 +57,9 @@ export default function LoginPage() {
           boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
           padding: '50px 40px'
         }}>
-          <div style={{ textAlign: 'center', marginBottom: '35px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '25px' }}>
             <div className="logo-float" style={{
-              width: '70px', height: '70px', margin: '0 auto 20px',
+              width: '70px', height: '70px', margin: '0 auto 16px',
               background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
               borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px'
             }}>💡</div>
