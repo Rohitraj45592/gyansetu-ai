@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import axios from 'axios'
-import { Send, Sparkles, User, Plus, Mic } from 'lucide-react'
+import { Send, Lightbulb, User, Mic } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 
 interface Message {
@@ -17,7 +17,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [greeting, setGreeting] = useState('')
+  const [greeting, setGreeting] = useState('Good Morning')
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -25,13 +25,8 @@ export default function ChatPage() {
     if (!token) router.push('/login')
 
     const updateGreeting = () => {
-      const istHour = parseInt(
-        new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric',
-          hour12: false,
-          timeZone: 'Asia/Kolkata',
-        }).format(new Date())
-      )
+      const istString = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour12: false })
+      const istHour = new Date(istString).getHours()
       if (istHour < 12) setGreeting('Good Morning')
       else if (istHour < 17) setGreeting('Good Afternoon')
       else setGreeting('Good Evening')
@@ -82,13 +77,13 @@ export default function ChatPage() {
 
         {isEmpty ? (
           /* Empty state - centered welcome */
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-10">
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-10 -mt-10">
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-5"
               style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-              <Sparkles size={26} className="text-white" />
+              <Lightbulb size={26} className="text-white" />
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
@@ -99,10 +94,7 @@ export default function ChatPage() {
             </motion.h1>
 
             <div className="w-full max-w-2xl">
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-3 py-2.5">
-                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                  <Plus size={18} />
-                </button>
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -124,7 +116,7 @@ export default function ChatPage() {
                 </motion.button>
               </div>
 
-              <div className="flex flex-wrap gap-2 justify-center mt-4">
+              <div className="flex flex-wrap gap-2 justify-center mt-5">
                 {suggestions.map((s, i) => (
                   <motion.button
                     key={i}
@@ -156,7 +148,7 @@ export default function ChatPage() {
                   }`}
                     style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
                     {msg.role === 'ai'
-                      ? <Sparkles size={14} className="text-white" />
+                      ? <Lightbulb size={14} className="text-white" />
                       : <User size={14} className="text-gray-300" />}
                   </div>
 
@@ -178,7 +170,7 @@ export default function ChatPage() {
                   className="flex gap-3 w-full sm:max-w-[85%]">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                    <Sparkles size={14} className="text-white" />
+                    <Lightbulb size={14} className="text-white" />
                   </div>
                   <div className="bg-[#15151f] border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
                     {[0, 1, 2].map(i => (
@@ -197,10 +189,7 @@ export default function ChatPage() {
 
             {/* Input */}
             <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]">
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-3 py-2.5 max-w-2xl mx-auto w-full">
-                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                  <Plus size={18} />
-                </button>
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3 max-w-2xl mx-auto w-full">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
