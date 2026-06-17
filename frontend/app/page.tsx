@@ -126,7 +126,7 @@ export default function Home() {
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#E5E7EB', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email address</label>
                 <input type="email" className="finput" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com" required
+                  placeholder="rohit.student@gyansetu.com" required
                   style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.5)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
               </div>
 
