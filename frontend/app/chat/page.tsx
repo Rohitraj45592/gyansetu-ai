@@ -12,28 +12,26 @@ interface Message {
   text: string
 }
 
+const greetings = [
+  'Hello, Rohit',
+  'Welcome back, Rohit',
+  'Rohit returns!',
+  'Hey there, Rohit',
+  'Good to see you, Rohit',
+]
+
 export default function ChatPage() {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [greeting, setGreeting] = useState('Good Morning')
+  const [greeting, setGreeting] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) router.push('/login')
-
-    const updateGreeting = () => {
-      const istString = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour12: false })
-      const istHour = new Date(istString).getHours()
-      if (istHour < 12) setGreeting('Good Morning')
-      else if (istHour < 17) setGreeting('Good Afternoon')
-      else setGreeting('Good Evening')
-    }
-    updateGreeting()
-    const interval = setInterval(updateGreeting, 60000)
-    return () => clearInterval(interval)
+    setGreeting(greetings[Math.floor(Math.random() * greetings.length)])
   }, [])
 
   useEffect(() => {
@@ -81,19 +79,33 @@ export default function ChatPage() {
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-5"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3"
               style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-              <Lightbulb size={26} className="text-white" />
+              <Lightbulb size={22} className="text-white" />
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-2xl sm:text-3xl font-semibold text-white text-center mb-8">
-              {greeting}, Rohit
+              className="text-2xl sm:text-3xl font-semibold text-white text-center mb-4">
+              {greeting}
             </motion.h1>
 
             <div className="w-full max-w-2xl">
+              <div className="flex flex-wrap gap-2 justify-center mb-3">
+                {suggestions.map((s, i) => (
+                  <motion.button
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => sendMessage(s)}
+                    className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                    {s}
+                  </motion.button>
+                ))}
+              </div>
+
               <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
                 <input
                   value={input}
@@ -114,20 +126,6 @@ export default function ChatPage() {
                   style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                   <Send size={16} />
                 </motion.button>
-              </div>
-
-              <div className="flex flex-wrap gap-2 justify-center mt-5">
-                {suggestions.map((s, i) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    onClick={() => sendMessage(s)}
-                    className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
-                    {s}
-                  </motion.button>
-                ))}
               </div>
             </div>
           </div>
