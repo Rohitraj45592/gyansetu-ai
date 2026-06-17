@@ -38,27 +38,27 @@ export default function AttendancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p className="text-sm text-gray-400">Loading attendance...</p>
+          <div className="w-10 h-10 border-3 border-purple-900 border-t-purple-500 rounded-full animate-spin"></div>
+          <p className="text-sm text-gray-500">Loading attendance...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a0f] flex overflow-x-hidden">
       <Sidebar />
 
-<main className="flex-1 min-w-0 px-4 pb-8 sm:px-8 lg:px-14 pt-16 lg:pt-8">
+      <main className="flex-1 min-w-0 px-4 pb-8 sm:px-8 lg:px-14 pt-16 lg:pt-8">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
-          <p className="text-gray-500 text-sm mt-1">Subject-wise breakdown of your attendance record.</p>
+          <h1 className="text-2xl font-bold text-white">Attendance</h1>
+          <p className="text-gray-400 text-sm mt-1">Subject-wise breakdown of your attendance record.</p>
         </motion.div>
 
         {/* Overall Summary Card */}
@@ -66,12 +66,12 @@ export default function AttendancePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6 flex items-center justify-between">
+          className="bg-[#15151f] rounded-2xl p-6 border border-white/[0.06] shadow-sm mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Overall Attendance</p>
-            <p className="text-4xl font-bold text-gray-900">{overallAttendance}%</p>
+            <p className="text-sm text-gray-400 mb-1">Overall Attendance</p>
+            <p className="text-4xl font-bold text-white">{overallAttendance}%</p>
             <p className={`text-sm font-medium mt-1 flex items-center gap-1 ${
-              overallAttendance >= 75 ? 'text-green-600' : 'text-amber-600'
+              overallAttendance >= 75 ? 'text-green-400' : 'text-amber-400'
             }`}>
               {overallAttendance >= 75 ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
               {overallAttendance >= 75 ? 'You are on track!' : 'Attendance below 75%'}
@@ -93,29 +93,29 @@ export default function AttendancePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 + i * 0.07 }}
-              className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+              className="bg-[#15151f] rounded-2xl p-6 border border-white/[0.06] shadow-sm hover:border-white/[0.12] transition-all">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                    <BookOpen size={18} className="text-indigo-600" />
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <BookOpen size={18} className="text-purple-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{a.subject}</p>
-                    <p className="text-xs text-gray-400">{a.present} / {a.total} classes attended</p>
+                    <p className="font-semibold text-white">{a.subject}</p>
+                    <p className="text-xs text-gray-500">{a.present} / {a.total} classes attended</p>
                   </div>
                 </div>
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  a.status === 'Safe' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                  a.status === 'Safe' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'
                 }`}>
                   {a.status === 'Safe' ? 'Safe' : 'Low'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl font-bold text-gray-900">{a.percentage}%</span>
+                <span className="text-2xl font-bold text-white">{a.percentage}%</span>
               </div>
 
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${a.percentage}%` }}

@@ -58,9 +58,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a0f] flex overflow-x-hidden">
       <Sidebar />
-<main className="flex-1 min-w-0 flex flex-col h-screen pt-16 lg:pt-0">
+      <main className="flex-1 min-w-0 flex flex-col h-screen pt-16 lg:pt-0">
         <div style={{ height: '56px', flexShrink: 0 }} />
 
         {/* Messages */}
@@ -74,20 +74,20 @@ export default function ChatPage() {
               className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
 
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                msg.role === 'ai' ? '' : 'bg-gray-200'
+                msg.role === 'ai' ? '' : 'bg-white/10'
               }`}
-                style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #6366f1, #818cf8)' } : {}}>
+                style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
                 {msg.role === 'ai'
                   ? <Sparkles size={14} className="text-white" />
-                  : <User size={14} className="text-gray-500" />}
+                  : <User size={14} className="text-gray-300" />}
               </div>
 
               <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
                 msg.role === 'ai'
-                  ? 'bg-white border border-gray-100 text-gray-800 shadow-sm prose prose-sm max-w-none'
+                  ? 'bg-[#15151f] border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
                   : 'text-white whitespace-pre-line'
               }`}
-                style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #6366f1, #818cf8)' } : {}}>
+                style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
                 {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
               </div>
             </motion.div>
@@ -99,16 +99,16 @@ export default function ChatPage() {
               animate={{ opacity: 1 }}
               className="flex gap-3 w-full sm:max-w-[85%]">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+                style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                 <Sparkles size={14} className="text-white" />
               </div>
-              <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
+              <div className="bg-[#15151f] border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
                 {[0, 1, 2].map(i => (
                   <motion.div
                     key={i}
                     animate={{ y: [0, -4, 0] }}
                     transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                    className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    className="w-1.5 h-1.5 rounded-full bg-purple-400" />
                 ))}
               </div>
             </motion.div>
@@ -127,7 +127,7 @@ export default function ChatPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 onClick={() => sendMessage(s)}
-                className="text-sm px-4 py-2 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all">
+                className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
                 {s}
               </motion.button>
             ))}
@@ -135,14 +135,14 @@ export default function ChatPage() {
         )}
 
         {/* Input */}
-        <div className="px-4 sm:px-10 py-5 border-t border-gray-100 bg-white">
+        <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]">
           <div className="flex items-center gap-3 w-full">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
               placeholder="Apna sawaal type karo..."
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50 outline-none text-sm text-gray-900"
+              className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-[#15151f] focus:border-purple-400/50 focus:ring-4 focus:ring-purple-500/10 outline-none text-sm text-white placeholder:text-gray-500"
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -150,7 +150,7 @@ export default function ChatPage() {
               onClick={() => sendMessage(input)}
               disabled={loading}
               className="w-11 h-11 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+              style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
               <Send size={18} />
             </motion.button>
           </div>
