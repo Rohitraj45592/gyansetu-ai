@@ -74,61 +74,123 @@ export default function ChatPage() {
         <div style={{ height: '56px', flexShrink: 0 }} className="hidden lg:block" />
 
         {isEmpty ? (
-          /* Empty state - centered welcome */
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-10 -mt-10">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3"
-              style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-              <Lightbulb size={22} className="text-white" />
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-2xl sm:text-3xl font-semibold text-white text-center mb-4">
-              {greeting}
-            </motion.h1>
+          <>
+            {/* Desktop: centered welcome */}
+            <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-10 -mt-10">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+                style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                <Lightbulb size={22} className="text-white" />
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-3xl font-semibold text-white text-center mb-8">
+                {greeting}
+              </motion.h1>
 
-            <div className="w-full max-w-2xl">
-              <div className="flex flex-wrap gap-2 justify-center mb-3">
-                {suggestions.map((s, i) => (
+              <div className="w-full max-w-2xl">
+                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                  {suggestions.map((s, i) => (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => sendMessage(s)}
+                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                      {s}
+                    </motion.button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+                    placeholder="Apna sawaal type karo..."
+                    className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+                  />
+                  <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                    <Mic size={18} />
+                  </button>
                   <motion.button
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    onClick={() => sendMessage(s)}
-                    className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
-                    {s}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => sendMessage(input)}
+                    disabled={loading}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                    <Send size={16} />
                   </motion.button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                  placeholder="Apna sawaal type karo..."
-                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-                />
-                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                  <Mic size={18} />
-                </button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => sendMessage(input)}
-                  disabled={loading}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                  <Send size={16} />
-                </motion.button>
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Mobile: greeting near top, input pinned at bottom */}
+            <div className="lg:hidden flex-1 flex flex-col px-4">
+              <div className="flex flex-col items-center pt-10 pb-6">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                  <Lightbulb size={20} className="text-white" />
+                </motion.div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-xl font-semibold text-white text-center">
+                  {greeting}
+                </motion.h1>
+              </div>
+
+              <div className="flex-1" />
+
+              <div className="pb-6">
+                <div className="flex flex-wrap gap-2 justify-center mb-3">
+                  {suggestions.map((s, i) => (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => sendMessage(s)}
+                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                      {s}
+                    </motion.button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+                    placeholder="Apna sawaal type karo..."
+                    className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+                  />
+                  <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                    <Mic size={18} />
+                  </button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => sendMessage(input)}
+                    disabled={loading}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                    <Send size={16} />
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           <>
             {/* Messages */}
