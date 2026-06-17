@@ -80,20 +80,21 @@ export default function ChatPage() {
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-                style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                className="w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)', marginBottom: '24px' }}>
                 <Lightbulb size={22} className="text-white" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-3xl font-semibold text-white text-center mb-8">
+                className="text-3xl font-semibold text-white text-center"
+                style={{ marginBottom: '40px' }}>
                 {greeting}
               </motion.h1>
 
               <div className="w-full max-w-2xl">
-                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '20px' }}>
                   {suggestions.map((s, i) => (
                     <motion.button
                       key={i}
@@ -131,14 +132,14 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {/* Mobile: greeting near top, input pinned at bottom */}
-            <div className="lg:hidden flex-1 flex flex-col px-4">
-              <div className="flex flex-col items-center pt-10 pb-6">
+            {/* Mobile: fixed layout, no flex-1 stretching */}
+            <div className="lg:hidden flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
+              <div className="flex flex-col items-center justify-center flex-1 px-4">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)', marginBottom: '16px' }}>
                   <Lightbulb size={20} className="text-white" />
                 </motion.div>
                 <motion.h1
@@ -150,10 +151,8 @@ export default function ChatPage() {
                 </motion.h1>
               </div>
 
-              <div className="flex-1" />
-
-              <div className="pb-6">
-                <div className="flex flex-wrap gap-2 justify-center mb-3">
+              <div className="px-4 pb-6" style={{ flexShrink: 0 }}>
+                <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '14px' }}>
                   {suggestions.map((s, i) => (
                     <motion.button
                       key={i}
