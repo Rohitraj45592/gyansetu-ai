@@ -31,23 +31,33 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Desktop spacer - pushes content right of rail */}
+      <style>{`
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(245,158,11,0.5), 0 0 40px rgba(139,92,246,0.2); }
+          50% { box-shadow: 0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(139,92,246,0.4); }
+        }
+        .bulb-glow { animation: glowPulse 2s ease-in-out infinite; }
+      `}</style>
+
+      {/* Desktop spacer */}
       <div style={{ width: '64px', flexShrink: 0 }} className="hidden lg:block" />
 
-      {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center justify-between px-5 z-40">
+      {/* Mobile top bar - dark theme */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-5 z-40"
+        style={{ background: '#0f1117', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button
           onClick={() => setOpen(true)}
-          className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors -ml-1"
+          className="p-2.5 rounded-xl text-gray-400 hover:text-white transition-colors -ml-1"
           aria-label="Open menu">
           <PanelLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5">
-          <span className="font-bold text-gray-900 text-base">GyanSetu AI</span>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-            <span className="text-sm">🎓</span>
-          </div>
+          <span className="font-bold text-white text-base">GyanSetu AI</span>
+          <div className="bulb-glow" style={{
+            width: '32px', height: '32px', borderRadius: '8px',
+            background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
+          }}>💡</div>
         </div>
       </div>
 
@@ -60,10 +70,11 @@ export default function Sidebar() {
           <PanelLeft size={20} />
         </button>
 
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-6 flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-          <span className="text-lg">🎓</span>
-        </div>
+        <div className="bulb-glow mb-6" style={{
+          width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
+          background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+        }}>💡</div>
 
         <nav className="flex-1 flex flex-col items-center gap-2">
           {navItems.map((item) => {
@@ -116,10 +127,12 @@ export default function Sidebar() {
 
         <div className="flex items-center justify-between px-6 pt-8 pb-8">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
-              <span className="text-2xl">🎓</span>
-            </div>
+            <div className="bulb-glow" style={{
+              width: '48px', height: '48px', borderRadius: '14px',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '24px', flexShrink: 0
+            }}>💡</div>
             <span className="text-[24px] font-extrabold text-white tracking-tight leading-none">
               GyanSetu AI
             </span>
