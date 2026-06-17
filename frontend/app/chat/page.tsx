@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import axios from 'axios'
-import { Send, Sparkles, User } from 'lucide-react'
+import { Send, Sparkles, User, Plus, Mic } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 
 interface Message {
@@ -14,16 +14,31 @@ interface Message {
 
 export default function ChatPage() {
   const router = useRouter()
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'ai', text: "Hi Rohit! 👋 Main GyanSetu AI hoon. Aap mujhse apna attendance, marks, timetable ya notices ke baare mein kuch bhi pooch sakte hain!" }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [greeting, setGreeting] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) router.push('/login')
+
+    const updateGreeting = () => {
+      const istHour = parseInt(
+        new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric',
+          hour12: false,
+          timeZone: 'Asia/Kolkata',
+        }).format(new Date())
+      )
+      if (istHour < 12) setGreeting('Good Morning')
+      else if (istHour < 17) setGreeting('Good Afternoon')
+      else setGreeting('Good Evening')
+    }
+    updateGreeting()
+    const interval = setInterval(updateGreeting, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -57,104 +72,158 @@ export default function ChatPage() {
     }
   }
 
+  const isEmpty = messages.length === 0
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex overflow-x-hidden">
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col h-screen pt-16 lg:pt-0">
-        <div style={{ height: '56px', flexShrink: 0 }} />
+        <div style={{ height: '56px', flexShrink: 0 }} className="hidden lg:block" />
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-6 pb-6 space-y-4">
-          {messages.map((msg, i) => (
+        {isEmpty ? (
+          /* Empty state - centered welcome */
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-10">
             <motion.div
-              key={i}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-5"
+              style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+              <Sparkles size={26} className="text-white" />
+            </motion.div>
+            <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
+              transition={{ duration: 0.5 }}
+              className="text-2xl sm:text-3xl font-semibold text-white text-center mb-8">
+              {greeting}, Rohit
+            </motion.h1>
 
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                msg.role === 'ai' ? '' : 'bg-white/10'
-              }`}
-                style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
-                {msg.role === 'ai'
-                  ? <Sparkles size={14} className="text-white" />
-                  : <User size={14} className="text-gray-300" />}
+            <div className="w-full max-w-2xl">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-3 py-2.5">
+                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                  <Plus size={18} />
+                </button>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+                  placeholder="Apna sawaal type karo..."
+                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+                />
+                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                  <Mic size={18} />
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => sendMessage(input)}
+                  disabled={loading}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                  <Send size={16} />
+                </motion.button>
               </div>
 
-              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
-                msg.role === 'ai'
-                  ? 'bg-[#15151f] border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
-                  : 'text-white whitespace-pre-line'
-              }`}
-                style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
-                {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
-              </div>
-            </motion.div>
-          ))}
-
-          {loading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex gap-3 w-full sm:max-w-[85%]">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                <Sparkles size={14} className="text-white" />
-              </div>
-              <div className="bg-[#15151f] border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
-                {[0, 1, 2].map(i => (
-                  <motion.div
+              <div className="flex flex-wrap gap-2 justify-center mt-4">
+                {suggestions.map((s, i) => (
+                  <motion.button
                     key={i}
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                    className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => sendMessage(s)}
+                    className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                    {s}
+                  </motion.button>
                 ))}
               </div>
-            </motion.div>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Suggestions */}
-        {messages.length === 1 && (
-          <div className="px-4 sm:px-10 pb-3 flex flex-wrap gap-2">
-            {suggestions.map((s, i) => (
-              <motion.button
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => sendMessage(s)}
-                className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
-                {s}
-              </motion.button>
-            ))}
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-6 pb-6 space-y-4">
+              {messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
+
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    msg.role === 'ai' ? '' : 'bg-white/10'
+                  }`}
+                    style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
+                    {msg.role === 'ai'
+                      ? <Sparkles size={14} className="text-white" />
+                      : <User size={14} className="text-gray-300" />}
+                  </div>
+
+                  <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
+                    msg.role === 'ai'
+                      ? 'bg-[#15151f] border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
+                      : 'text-white whitespace-pre-line'
+                  }`}
+                    style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
+                    {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
+                  </div>
+                </motion.div>
+              ))}
+
+              {loading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex gap-3 w-full sm:max-w-[85%]">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                    <Sparkles size={14} className="text-white" />
+                  </div>
+                  <div className="bg-[#15151f] border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
+                    {[0, 1, 2].map(i => (
+                      <motion.div
+                        key={i}
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                        className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Input */}
+            <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-3 py-2.5 max-w-2xl mx-auto w-full">
+                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                  <Plus size={18} />
+                </button>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+                  placeholder="Apna sawaal type karo..."
+                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+                />
+                <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
+                  <Mic size={18} />
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => sendMessage(input)}
+                  disabled={loading}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                  <Send size={16} />
+                </motion.button>
+              </div>
+            </div>
+          </>
         )}
-
-        {/* Input */}
-        <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]">
-          <div className="flex items-center gap-3 w-full">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-              placeholder="Apna sawaal type karo..."
-              className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-[#15151f] focus:border-purple-400/50 focus:ring-4 focus:ring-purple-500/10 outline-none text-sm text-white placeholder:text-gray-500"
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => sendMessage(input)}
-              disabled={loading}
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-              <Send size={18} />
-            </motion.button>
-          </div>
-        </div>
       </main>
     </div>
   )
