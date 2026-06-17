@@ -27,11 +27,23 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false)
   const [greeting, setGreeting] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const mobileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) router.push('/login')
     setGreeting(greetings[Math.floor(Math.random() * greetings.length)])
+
+    // Auto-focus input on mount (opens keyboard on mobile)
+    const timer = setTimeout(() => {
+      if (window.innerWidth < 1024) {
+        mobileInputRef.current?.focus()
+      } else {
+        inputRef.current?.focus()
+      }
+    }, 300)
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -67,8 +79,26 @@ export default function ChatPage() {
 
   const isEmpty = messages.length === 0
 
+  const spaceBackground = {
+    backgroundColor: '#0a0a0f',
+    backgroundImage: `
+      radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 60px 70px, rgba(167,139,250,0.4), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(245,158,11,0.3), transparent),
+      radial-gradient(2px 2px at 160px 20px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 200px 100px, rgba(167,139,250,0.4), transparent),
+      radial-gradient(1px 1px at 240px 50px, rgba(255,255,255,0.3), transparent),
+      radial-gradient(2px 2px at 280px 90px, rgba(245,158,11,0.3), transparent),
+      radial-gradient(1px 1px at 30px 120px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 110px 150px, rgba(167,139,250,0.3), transparent)
+    `,
+    backgroundSize: '300px 200px',
+    backgroundRepeat: 'repeat',
+  }
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex overflow-x-hidden">
+    <div className="min-h-screen flex overflow-x-hidden" style={spaceBackground}>
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col h-screen pt-16 lg:pt-0">
         <div style={{ height: '56px', flexShrink: 0 }} className="hidden lg:block" />
@@ -102,14 +132,15 @@ export default function ChatPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1 }}
                       onClick={() => sendMessage(s)}
-                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                       {s}
                     </motion.button>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
+                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/90 backdrop-blur-sm px-4 py-3">
                   <input
+                    ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
@@ -132,7 +163,7 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {/* Mobile: fixed layout, no flex-1 stretching */}
+            {/* Mobile: fixed layout */}
             <div className="lg:hidden flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
               <div className="flex flex-col items-center justify-center flex-1 px-4">
                 <motion.div
@@ -160,14 +191,15 @@ export default function ChatPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1 }}
                       onClick={() => sendMessage(s)}
-                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all">
+                      className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                       {s}
                     </motion.button>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3">
+                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/90 backdrop-blur-sm px-4 py-3">
                   <input
+                    ref={mobileInputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
@@ -213,7 +245,7 @@ export default function ChatPage() {
 
                   <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
                     msg.role === 'ai'
-                      ? 'bg-[#15151f] border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
+                      ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
                       : 'text-white whitespace-pre-line'
                   }`}
                     style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
@@ -231,7 +263,7 @@ export default function ChatPage() {
                     style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                     <Lightbulb size={14} className="text-white" />
                   </div>
-                  <div className="bg-[#15151f] border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
+                  <div className="bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
                     {[0, 1, 2].map(i => (
                       <motion.div
                         key={i}
@@ -247,8 +279,8 @@ export default function ChatPage() {
             </div>
 
             {/* Input */}
-            <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]">
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f] px-4 py-3 max-w-2xl mx-auto w-full">
+            <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a0f]/80 backdrop-blur-sm">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/90 backdrop-blur-sm px-4 py-3 max-w-2xl mx-auto w-full">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
