@@ -1,126 +1,209 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import axios from 'axios'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleLogin = async () => {
-    setLoading(true)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     setError('')
+    setLoading(true)
     try {
-      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', { email, password })
+      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', {
+        email, password
+      })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
-    } catch (err) {
-      setError('Invalid email or password!')
+    } catch {
+      setError('Invalid email or password. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #f8f7ff 0%, #ede9fe 50%, #e0e7ff 100%)' }}>
+    <>
+      <style>{`
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatAndGlow {
+          0%, 100% {
+            transform: translateY(0px);
+            box-shadow: 0 15px 35px rgba(139,92,246,0.3), 0 0 20px rgba(245,158,11,0.3);
+          }
+          50% {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 45px rgba(139,92,246,0.5), 0 0 40px rgba(245,158,11,0.6);
+          }
+        }
+        .login-card { animation: slideIn 0.5s ease-out; }
+        .logo-float { animation: floatAndGlow 3s ease-in-out infinite; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139,92,246,0.4); }
+        .login-btn:active { transform: translateY(0); }
+        .google-btn:hover { background: rgba(139,92,246,0.1); border-color: #8B5CF6; }
+        .input-field:hover { background: rgba(55,65,81,0.8); border-color: rgba(139,92,246,0.5); }
+        .input-field:focus { outline: none; background: rgba(55,65,81,0.9); border-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+      `}</style>
 
-      {/* Background Orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-      <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-      <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.1) 0%, transparent 70%)', filter: 'blur(60px)', transform: 'translate(-50%, -50%)' }} />
-
-      {/* Login Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-md mx-4"
-      >
-        <div className="rounded-2xl p-8 shadow-2xl"
-          style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(99,102,241,0.15)' }}>
+      <div style={{
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        background: 'linear-gradient(135deg, #0F1419 0%, #1a1f2e 100%)',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px'
+      }}>
+        <div className="login-card" style={{
+          width: '100%',
+          maxWidth: '450px',
+          background: 'rgba(20,25,35,0.9)',
+          border: '1px solid rgba(139,92,246,0.2)',
+          borderRadius: '16px',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          padding: '50px 40px'
+        }}>
 
           {/* Logo */}
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring' }}
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-            >
-              <span className="text-white text-2xl font-bold">G</span>
-            </motion.div>
-            <h1 className="text-2xl font-bold" style={{ color: '#1e1b4b' }}>GyanSetu AI</h1>
-            <p className="text-sm mt-1" style={{ color: '#6b7280' }}>GenAI-powered ERP Copilot</p>
+          <div style={{ textAlign: 'center', marginBottom: '35px' }}>
+            <div className="logo-float" style={{
+              width: '70px', height: '70px',
+              margin: '0 auto 20px',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
+              borderRadius: '16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '36px'
+            }}>💡</div>
+            <h1 style={{
+              fontSize: '28px', fontWeight: 700, marginBottom: '8px',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>GyanSetu AI</h1>
+            <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>GenAI-powered ERP Copilot</p>
           </div>
 
-          {/* Error */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-4 p-3 rounded-lg text-sm text-center"
-              style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
-            >
-              {error}
-            </motion.div>
-          )}
+          {/* Form */}
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block', fontSize: '13px', fontWeight: 600,
+                marginBottom: '8px', color: '#E5E7EB',
+                textTransform: 'uppercase', letterSpacing: '0.5px'
+              }}>Email</label>
+              <input
+                type="email"
+                className="input-field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="rohit.student@gyansetu.com"
+                required
+                style={{
+                  width: '100%', padding: '12px 14px',
+                  background: 'rgba(55,65,81,0.6)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  borderRadius: '8px', color: '#E5E7EB',
+                  fontSize: '14px', transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
 
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="rohit@gyansetu.com"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-              style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', color: '#1e1b4b' }}
-            />
-          </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block', fontSize: '13px', fontWeight: 600,
+                marginBottom: '8px', color: '#E5E7EB',
+                textTransform: 'uppercase', letterSpacing: '0.5px'
+              }}>Password</label>
+              <input
+                type="password"
+                className="input-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={{
+                  width: '100%', padding: '12px 14px',
+                  background: 'rgba(55,65,81,0.6)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  borderRadius: '8px', color: '#E5E7EB',
+                  fontSize: '14px', transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
 
-          {/* Password */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-              style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', color: '#1e1b4b' }}
-            />
-          </div>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', margin: '12px 0 24px', fontSize: '12px'
+            }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9CA3AF', cursor: 'pointer' }}>
+                <input type="checkbox" style={{ width: '14px', height: '14px', accentColor: '#8B5CF6' }} />
+                Remember me
+              </label>
+              <a href="#" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 600 }}>Forgot password?</a>
+            </div>
 
-          {/* Button */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold text-white transition-all"
-            style={{ background: loading ? '#a5b4fc' : 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-          >
-            {loading ? 'Logging in...' : 'Login →'}
-          </motion.button>
+            {error && (
+              <p style={{
+                color: '#f87171', fontSize: '13px', marginBottom: '16px',
+                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                borderRadius: '8px', padding: '10px 14px'
+              }}>{error}</p>
+            )}
 
-          {/* Demo credentials */}
-          <div className="mt-6 p-3 rounded-xl text-center"
-            style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.1)' }}>
-            <p className="text-xs" style={{ color: '#6b7280' }}>Demo: <span style={{ color: '#6366f1' }}>rohit.student@gyansetu.com</span> / <span style={{ color: '#6366f1' }}>rohit123</span></p>
-          </div>
+            <button type="submit" className="login-btn" disabled={loading} style={{
+              width: '100%', padding: '12px 16px',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+              color: 'white', border: 'none', borderRadius: '8px',
+              fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease', textTransform: 'uppercase',
+              letterSpacing: '0.5px', marginBottom: '16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              opacity: loading ? 0.7 : 1
+            }}>
+              {loading ? 'Signing in...' : 'Sign In →'}
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }}></div>
+              <span style={{ fontSize: '11px', color: '#6B7280', textTransform: 'uppercase' }}>Or continue with</span>
+              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }}></div>
+            </div>
+
+            <button type="button" className="google-btn" style={{
+              width: '100%', padding: '10px 12px',
+              background: 'transparent',
+              border: '1px solid rgba(139,92,246,0.3)',
+              borderRadius: '8px', color: '#E5E7EB',
+              fontSize: '13px', cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+            }}>
+              🔵 Continue with Google
+            </button>
+
+            <div style={{
+              textAlign: 'center', marginTop: '20px', paddingTop: '20px',
+              borderTop: '1px solid rgba(139,92,246,0.1)',
+              fontSize: '11px', color: '#6B7280', lineHeight: 1.6
+            }}>
+              <strong style={{ color: '#9CA3AF', display: 'block', marginBottom: '4px' }}>Demo Credentials:</strong>
+              rohit.student@gyansetu.com / rohit123
+            </div>
+          </form>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </>
   )
 }
