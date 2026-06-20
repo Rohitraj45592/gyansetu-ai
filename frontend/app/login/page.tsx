@@ -9,24 +9,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const doLogin = async (loginEmail: string, loginPassword: string) => {
     setError('')
-    setLoading(true)
     try {
       const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', {
-        email: email.trim().toLowerCase(),
-        password: password.trim()
+        email: loginEmail.trim().toLowerCase(),
+        password: loginPassword.trim()
       })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
     } catch {
       setError('Invalid email or password. Please try again.')
-    } finally {
-      setLoading(false)
     }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    await doLogin(email, password)
+    setLoading(false)
+  }
+
+  const handleTryDemo = async () => {
+    setDemoLoading(true)
+    await doLogin('rohit.student@gyansetu.com', 'rohit123')
+    setDemoLoading(false)
   }
 
   return (
@@ -42,6 +52,8 @@ export default function LoginPage() {
         .logo-float { animation: floatAndGlow 3s ease-in-out infinite; }
         .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139,92,246,0.4); }
         .login-btn:active { transform: translateY(0); }
+        .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(20,184,166,0.35); }
+        .demo-btn:active { transform: translateY(0); }
         .google-btn:hover { background: rgba(139,92,246,0.1) !important; border-color: #8B5CF6 !important; }
         .linput:hover { background: rgba(55,65,81,0.8) !important; border-color: rgba(139,92,246,0.5) !important; }
         .linput:focus { outline: none; background: rgba(55,65,81,0.9) !important; border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
@@ -74,6 +86,29 @@ export default function LoginPage() {
             <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>GenAI-powered ERP Copilot</p>
           </div>
 
+          {/* Try Demo button — one click, no visible credentials */}
+          <button
+            type="button"
+            className="demo-btn"
+            onClick={handleTryDemo}
+            disabled={demoLoading || loading}
+            style={{
+              width: '100%', padding: '12px 16px', marginBottom: '20px',
+              background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+              color: 'white', border: 'none', borderRadius: '8px',
+              fontSize: '14px', fontWeight: 700, cursor: demoLoading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              opacity: demoLoading ? 0.7 : 1
+            }}>
+            {demoLoading ? 'Loading demo...' : '✨ Try Demo'}
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0 24px' }}>
+            <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
+            <span style={{ fontSize: '11px', color: '#6B7280', textTransform: 'uppercase' }}>Or sign in</span>
+            <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
+          </div>
+
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#E5E7EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</label>
@@ -82,7 +117,7 @@ export default function LoginPage() {
                 className="linput"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="rohit.student@gyansetu.com"
+                placeholder="you@example.com"
                 required
                 autoCapitalize="none"
                 autoCorrect="off"
@@ -149,11 +184,6 @@ export default function LoginPage() {
 
             <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(139,92,246,0.1)', fontSize: '13px', color: '#9CA3AF' }}>
               Don't have an account? <a href="#" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 700 }}>Create one here</a>
-            </div>
-
-            <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(139,92,246,0.1)', fontSize: '11px', color: '#6B7280', lineHeight: 1.6 }}>
-              <strong style={{ color: '#9CA3AF', display: 'block', marginBottom: '4px' }}>Demo Credentials:</strong>
-              rohit.student@gyansetu.com / rohit123
             </div>
           </form>
         </div>
