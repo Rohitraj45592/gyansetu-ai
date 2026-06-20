@@ -67,8 +67,8 @@ export default function DashboardPage() {
 
       <main className="flex-1 min-w-0 overflow-hidden px-4 pb-24 sm:px-8 lg:px-14 pt-24 lg:pt-10">
 
-        {/* Header — no animation wrapper, always visible */}
-        <div className="flex items-center justify-between mb-10 gap-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-12 gap-4">
           <div className="min-w-0">
             <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'white' }} className="truncate">Good morning, Rohit 👋</h1>
             <p style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '4px' }}>Here's what's happening with your academics today.</p>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-14">
           <div className="min-w-0 neon-card"
             style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-14">
           <div className="min-w-0 neon-card"
             style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', alignSelf: 'flex-start', marginBottom: '10px' }}>Attendance Health</p>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
         <div className="min-w-0 neon-card"
           style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
           <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '18px' }}>Subject-wise Attendance</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {attendance.map((a: any, i: number) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
