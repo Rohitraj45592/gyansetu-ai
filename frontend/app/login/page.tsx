@@ -22,8 +22,12 @@ export default function LoginPage() {
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
-    } catch {
-      setError('Invalid email or password. Please try again.')
+    } catch (err: any) {
+      // TEMPORARY DEBUG — shows exact backend response so we can see what's failing
+      const status = err?.response?.status
+      const data = err?.response?.data
+      const msg = err?.message
+      setError(`DEBUG → status: ${status ?? 'no response'} | data: ${JSON.stringify(data) ?? 'none'} | msg: ${msg}`)
     } finally {
       setLoading(false)
     }
@@ -117,7 +121,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p style={{ color: '#f87171', fontSize: '13px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px' }}>{error}</p>
+              <p style={{ color: '#f87171', fontSize: '12px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px', wordBreak: 'break-word' }}>{error}</p>
             )}
 
             <button type="submit" className="login-btn" disabled={loading} style={{
