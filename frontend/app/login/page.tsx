@@ -15,7 +15,10 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', { email, password })
+      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', {
+        email: email.trim().toLowerCase(),
+        password: password.trim()
+      })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
@@ -74,15 +77,34 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#E5E7EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</label>
-              <input type="email" className="linput" value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="rohit.student@gyansetu.com" required
+              <input
+                type="email"
+                className="linput"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="rohit.student@gyansetu.com"
+                required
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="email"
+                spellCheck={false}
+                inputMode="email"
                 style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.6)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
             </div>
 
             <div style={{ marginBottom: '8px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#E5E7EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Password</label>
-              <input type="password" className="linput" value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" required
+              <input
+                type="password"
+                className="linput"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="current-password"
+                spellCheck={false}
                 style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.6)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
             </div>
 
