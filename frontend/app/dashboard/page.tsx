@@ -58,35 +58,42 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0F1419' }} className="flex overflow-x-hidden">
+      {/* Subtle white glow on hover — soft, professional, not neon */}
       <style>{`
-        .neon-card { transition: box-shadow 0.3s ease; }
-        .neon-card:hover { box-shadow: 0 0 32px rgba(139,92,246,0.35); }
-        .neon-card-teal:hover { box-shadow: 0 0 32px rgba(20,184,166,0.3) !important; }
+        .soft-card { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+        .soft-card:hover {
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 28px rgba(255,255,255,0.06);
+          border-color: rgba(255,255,255,0.16) !important;
+        }
       `}</style>
       <Sidebar />
 
-      <main className="flex-1 min-w-0 overflow-hidden px-4 pb-24 sm:px-8 lg:px-14 pt-24 lg:pt-10">
+      {/* min-w-0 + overflow-hidden on main prevents any child from pushing layout and overlapping the topbar */}
+      <main className="flex-1 min-w-0 overflow-hidden px-4 pb-28 sm:px-8 lg:px-14 pt-6 lg:pt-8">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-12 gap-4">
+        {/* Header — mt-14 on mobile pushes this below the fixed GyanSetu AI topbar so nothing overlaps */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between gap-4 mb-8 mt-14 lg:mt-0">
           <div className="min-w-0">
-            <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'white' }} className="truncate">Good morning, Rohit 👋</h1>
-            <p style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '4px' }}>Here's what's happening with your academics today.</p>
+            <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'white' }} className="truncate">Good morning, Rohit 👋</h1>
+            <p style={{ fontSize: '13px', color: '#9CA3AF', marginTop: '4px' }}>Here's what's happening with your academics today.</p>
           </div>
           <div style={{
             width: '40px', height: '40px', borderRadius: '50%',
             background: 'linear-gradient(135deg, #8B5CF6, #F59E0B)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', fontWeight: 600, fontSize: '14px', flexShrink: 0,
-            boxShadow: '0 0 18px rgba(139,92,246,0.45)'
+            color: 'white', fontWeight: 600, fontSize: '14px', flexShrink: 0
           }}>RK</div>
-        </div>
+        </motion.div>
 
-        {/* Top cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-14">
-          <div className="min-w-0 neon-card"
-            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+        {/* Top cards — generous gap-5 so cards never touch each other */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="soft-card min-w-0"
+            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CalendarCheck size={20} color="#8B5CF6" />
               </div>
@@ -96,16 +103,18 @@ export default function DashboardPage() {
             </div>
             <p style={{ fontSize: '32px', fontWeight: 700, color: 'white' }}>{overallAttendance}%</p>
             <p style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '4px' }}>Overall Attendance</p>
-            <div style={{ marginTop: '18px', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+            <div style={{ marginTop: '16px', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
               <motion.div initial={{ width: 0 }} animate={{ width: `${overallAttendance}%` }}
                 transition={{ duration: 1, delay: 0.3 }}
                 style={{ height: '100%', borderRadius: '99px', background: overallAttendance >= 75 ? '#22c55e' : '#f59e0b' }} />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="min-w-0 neon-card neon-card-teal"
-            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="soft-card min-w-0"
+            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(20,184,166,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <GraduationCap size={20} color="#14b8a6" />
               </div>
@@ -113,19 +122,21 @@ export default function DashboardPage() {
             </div>
             <p style={{ fontSize: '32px', fontWeight: 700, color: 'white' }}>{marks.length}</p>
             <p style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '4px' }}>Total Exam Records</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '18px', color: '#14b8a6', fontSize: '14px', fontWeight: 500 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: '#14b8a6', fontSize: '14px', fontWeight: 500 }}>
               <TrendingUp size={14} />
               <span>5 subjects tracked</span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-14">
-          <div className="min-w-0 neon-card"
-            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', alignSelf: 'flex-start', marginBottom: '10px' }}>Attendance Health</p>
-            <div style={{ width: '192px', height: '192px', position: 'relative' }}>
+        {/* Charts — stacked on mobile, side by side on large screens. gap-5 keeps clear separation */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="soft-card min-w-0"
+            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', alignSelf: 'flex-start', marginBottom: '12px' }}>Attendance Health</p>
+            <div style={{ width: '180px', height: '180px', position: 'relative' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart innerRadius="70%" outerRadius="100%" data={radialData} startAngle={90} endAngle={-270}>
                   <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
@@ -133,61 +144,70 @@ export default function DashboardPage() {
                 </RadialBarChart>
               </ResponsiveContainer>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '28px', fontWeight: 700, color: 'white' }}>{overallAttendance}%</span>
+                <span style={{ fontSize: '26px', fontWeight: 700, color: 'white' }}>{overallAttendance}%</span>
                 <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Overall</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-2 min-w-0 neon-card"
-            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '18px' }}>Internal 2 — Subject-wise Marks</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={marksChartData} margin={{ left: 0, right: 8 }}>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="lg:col-span-2 soft-card min-w-0"
+            style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '16px' }}>Internal 2 — Subject-wise Marks</p>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={marksChartData} margin={{ left: -8, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="subject" tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} interval={0} />
-                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} width={28} />
-                <Tooltip contentStyle={{ background: '#1a1f2e', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: 'white' }} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-                <Bar dataKey="score" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={28} />
+                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} width={26} />
+                <Tooltip
+                  contentStyle={{ background: '#1a1f2e', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: 'white', fontSize: '12px' }}
+                  cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                  trigger="hover"
+                />
+                <Bar dataKey="score" fill="#8B5CF6" radius={[6, 6, 0, 0]} barSize={26} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </motion.div>
         </div>
 
         {/* Subject-wise Attendance */}
-        <div className="min-w-0 neon-card"
-          style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '26px', border: '1px solid rgba(139,92,246,0.2)' }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="soft-card min-w-0"
+          style={{ background: 'rgba(20,25,35,0.9)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(255,255,255,0.07)' }}>
           <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '18px' }}>Subject-wise Attendance</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {attendance.map((a: any, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <BookOpen size={16} color="#6B7280" />
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BookOpen size={15} color="#6B7280" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '12px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#E5E7EB' }} className="truncate">{a.subject}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: a.percentage >= 75 ? '#22c55e' : '#f59e0b', flexShrink: 0 }}>{a.percentage}%</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '10px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#E5E7EB' }} className="truncate">{a.subject}</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: a.percentage >= 75 ? '#22c55e' : '#f59e0b', flexShrink: 0 }}>{a.percentage}%</span>
                   </div>
-                  <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+                  <div style={{ height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${a.percentage}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 + i * 0.05 }}
+                      transition={{ duration: 0.8, delay: 0.6 + i * 0.05 }}
                       style={{ height: '100%', borderRadius: '99px', background: a.percentage >= 75 ? '#22c55e' : '#f59e0b' }} />
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </main>
 
+      {/* Floating Chat Button — fixed to viewport corner, well clear of last card so it never sits on top of content */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.8, type: 'spring' }}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => router.push('/chat')}
         style={{
@@ -196,7 +216,7 @@ export default function DashboardPage() {
           background: 'linear-gradient(135deg, #8B5CF6, #F59E0B)',
           border: 'none', cursor: 'pointer', zIndex: 100,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 22px rgba(139,92,246,0.5), 0 6px 18px rgba(0,0,0,0.4)'
+          boxShadow: '0 6px 20px rgba(0,0,0,0.4)'
         }}>
         <MessageCircle size={22} color="white" />
       </motion.button>
