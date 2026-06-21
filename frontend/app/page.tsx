@@ -21,8 +21,13 @@ export default function Home() {
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
-    } catch {
-      setError('Invalid credentials. Please try again.')
+    } catch (err: any) {
+      // TEMPORARY DEBUG — remove after diagnosing mobile-data login issue
+      const status = err?.response?.status
+      const data = err?.response?.data
+      const msg = err?.message
+      const code = err?.code
+      setError(`DEBUG → status:${status ?? 'none'} code:${code ?? 'none'} msg:${msg} data:${JSON.stringify(data) ?? 'none'}`)
     }
   }
 
@@ -137,7 +142,6 @@ export default function Home() {
             <h1 className="form-header-h1" style={{ fontSize: '32px', fontWeight: 700, color: '#F9FAFB', marginBottom: '8px' }}>Welcome back</h1>
             <p style={{ fontSize: '14px', color: '#9CA3AF', marginBottom: '24px' }}>Login to continue to your dashboard</p>
 
-            {/* Try Demo button — one click, no visible credentials */}
             <button
               type="button"
               className="demo-btn"
@@ -203,7 +207,7 @@ export default function Home() {
               </div>
 
               {error && (
-                <p style={{ color: '#f87171', fontSize: '13px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px' }}>{error}</p>
+                <p style={{ color: '#f87171', fontSize: '12px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px', wordBreak: 'break-word' }}>{error}</p>
               )}
 
               <button type="submit" className="signin-btn" disabled={loading} style={{
