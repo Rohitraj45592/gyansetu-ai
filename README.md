@@ -41,7 +41,7 @@ Built as a full-stack project to demonstrate real-world skills: authentication, 
 | **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, Recharts |
 | **Backend** | FastAPI (Python) |
 | **Database** | Supabase (PostgreSQL) |
-| **AI / LLM** | OpenRouter — Text-to-SQL + RAG pipeline |
+| **AI / LLM** | Google Gemma 4 31B (via OpenRouter) — Text-to-SQL + RAG pipeline |
 | **Auth** | JWT |
 | **Voice** | Web Speech API |
 | **Hosting** | Vercel (frontend) · Railway (backend) |
@@ -93,7 +93,7 @@ Built as a full-stack project to demonstrate real-world skills: authentication, 
 1. User asks a question in natural language (typed or spoken)
 2. The query is interpreted and converted into a structured SQL query against the student's academic data (**Text-to-SQL**)
 3. Relevant context (notices, FAQs) is retrieved via a **RAG (Retrieval-Augmented Generation)** pipeline where needed
-4. The LLM (via OpenRouter) generates a natural-language response grounded in the retrieved data
+4. The LLM (**Google Gemma 4 31B**, via OpenRouter) generates a natural-language response grounded in the retrieved data
 
 ## 🏗️ Project Structure
 
