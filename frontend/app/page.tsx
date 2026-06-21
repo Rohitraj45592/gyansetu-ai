@@ -9,21 +9,34 @@ export default function Home() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const doLogin = async (loginEmail: string, loginPassword: string) => {
     setError('')
-    setLoading(true)
     try {
-      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', { email, password })
+      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', {
+        email: loginEmail.trim().toLowerCase(),
+        password: loginPassword.trim()
+      })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
     } catch {
       setError('Invalid credentials. Please try again.')
-    } finally {
-      setLoading(false)
     }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    await doLogin(email, password)
+    setLoading(false)
+  }
+
+  const handleTryDemo = async () => {
+    setDemoLoading(true)
+    await doLogin('rohit.student@gyansetu.com', 'rohit123')
+    setDemoLoading(false)
   }
 
   return (
@@ -45,6 +58,8 @@ export default function Home() {
         .fi3 { animation: slideInDown 0.6s ease-out 0.5s backwards; }
         .signin-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139,92,246,0.4); }
         .signin-btn:active { transform: translateY(0); }
+        .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(20,184,166,0.35); }
+        .demo-btn:active { transform: translateY(0); }
         .google-btn:hover { background: rgba(139,92,246,0.1) !important; border-color: #8B5CF6 !important; }
         .finput:hover { background: rgba(55,65,81,0.7) !important; border-color: rgba(139,92,246,0.5) !important; }
         .finput:focus { outline: none; background: rgba(55,65,81,0.9) !important; border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
@@ -120,20 +135,62 @@ export default function Home() {
         }}>
           <div className="form-container" style={{ maxWidth: '100%' }}>
             <h1 className="form-header-h1" style={{ fontSize: '32px', fontWeight: 700, color: '#F9FAFB', marginBottom: '8px' }}>Welcome back</h1>
-            <p style={{ fontSize: '14px', color: '#9CA3AF', marginBottom: '30px' }}>Login to continue to your dashboard</p>
+            <p style={{ fontSize: '14px', color: '#9CA3AF', marginBottom: '24px' }}>Login to continue to your dashboard</p>
+
+            {/* Try Demo button — one click, no visible credentials */}
+            <button
+              type="button"
+              className="demo-btn"
+              onClick={handleTryDemo}
+              disabled={demoLoading || loading}
+              style={{
+                width: '100%', padding: '12px 16px', marginBottom: '20px',
+                background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
+                color: 'white', border: 'none', borderRadius: '8px',
+                fontSize: '14px', fontWeight: 700, cursor: demoLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                opacity: demoLoading ? 0.7 : 1
+              }}>
+              {demoLoading ? 'Loading demo...' : '✨ Try Demo'}
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0 24px' }}>
+              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
+              <span style={{ fontSize: '11px', color: '#6B7280', textTransform: 'uppercase' }}>Or sign in</span>
+              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
+            </div>
 
             <form onSubmit={handleLogin}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#E5E7EB', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email address</label>
-                <input type="email" className="finput" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="rohit.student@gyansetu.com" required
+                <input
+                  type="email"
+                  className="finput"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="email"
+                  spellCheck={false}
+                  inputMode="email"
                   style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.5)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
               </div>
 
               <div style={{ marginBottom: '8px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#E5E7EB', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Password</label>
-                <input type="password" className="finput" value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" required
+                <input
+                  type="password"
+                  className="finput"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="current-password"
+                  spellCheck={false}
                   style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.5)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
               </div>
 
@@ -175,11 +232,6 @@ export default function Home() {
               }}>
                 🔵 Continue with Google
               </button>
-
-              <div style={{ textAlign: 'center', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(139,92,246,0.1)', fontSize: '11px', color: '#6B7280', lineHeight: 1.6 }}>
-  <strong style={{ color: '#9CA3AF', display: 'block', marginBottom: '4px' }}>Demo Credentials:</strong>
-  rohit.student@gyansetu.com / rohit123
-</div>
             </form>
           </div>
         </div>
