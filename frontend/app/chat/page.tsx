@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import axios from 'axios'
-import { Send, Lightbulb, User, Mic } from 'lucide-react'
+import { Send, Lightbulb, User, Mic, MicOff } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 
 interface Message {
@@ -26,9 +26,12 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [greeting, setGreeting] = useState('')
+  const [isListening, setIsListening] = useState(false)
+  const [micSupported, setMicSupported] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
+  const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -45,9 +48,56 @@ export default function ChatPage() {
     return () => clearTimeout(timer)
   }, [])
 
+  // Setup speech recognition once
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setMicSupported(false)
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.lang = 'hi-IN' // Hindi-India locale also understands English well on most devices
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0].transcript)
+        .join('')
+      setInput(transcript)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.onerror = () => {
+      setIsListening(false)
+    }
+
+    recognitionRef.current = recognition
+
+    return () => {
+      recognition.stop()
+    }
+  }, [])
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  const toggleMic = () => {
+    if (!micSupported || !recognitionRef.current) return
+    if (isListening) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    } else {
+      setInput('')
+      recognitionRef.current.start()
+      setIsListening(true)
+    }
+  }
 
   const suggestions = [
     'Mera attendance dikhao',
@@ -93,6 +143,23 @@ export default function ChatPage() {
     { left: 15, top: 78, size: 18, color: '#60a5fa' },
     { left: 92, top: 70, size: 10, color: '#f472b6' },
   ]
+
+  const MicButton = ({ size = 18 }: { size?: number }) => (
+    <button
+      type="button"
+      onClick={toggleMic}
+      disabled={!micSupported}
+      title={!micSupported ? 'Voice input not supported on this browser' : isListening ? 'Stop listening' : 'Speak your question'}
+      className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
+        isListening
+          ? 'text-red-400 bg-red-500/10 animate-pulse'
+          : micSupported
+          ? 'text-gray-400 hover:text-white hover:bg-white/5'
+          : 'text-gray-600 cursor-not-allowed'
+      }`}>
+      {isListening ? <MicOff size={size} /> : <Mic size={size} />}
+    </button>
+  )
 
   return (
     <>
@@ -220,12 +287,10 @@ export default function ChatPage() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                      placeholder="Apna sawaal type karo..."
+                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
                       className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
                     />
-                    <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                      <Mic size={18} />
-                    </button>
+                    <MicButton />
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -278,12 +343,10 @@ export default function ChatPage() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                      placeholder="Apna sawaal type karo..."
+                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
                       className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
                     />
-                    <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                      <Mic size={18} />
-                    </button>
+                    <MicButton />
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -358,12 +421,10 @@ export default function ChatPage() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                    placeholder="Apna sawaal type karo..."
+                    placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
                     className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
                   />
-                  <button className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0">
-                    <Mic size={18} />
-                  </button>
+                  <MicButton />
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
