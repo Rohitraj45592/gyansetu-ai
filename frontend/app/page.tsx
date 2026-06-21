@@ -22,12 +22,11 @@ export default function Home() {
       localStorage.setItem('student_id', '1')
       router.push('/dashboard')
     } catch (err: any) {
-      // TEMPORARY DEBUG — remove after diagnosing mobile-data login issue
-      const status = err?.response?.status
-      const data = err?.response?.data
-      const msg = err?.message
-      const code = err?.code
-      setError(`DEBUG → status:${status ?? 'none'} code:${code ?? 'none'} msg:${msg} data:${JSON.stringify(data) ?? 'none'}`)
+      if (err?.code === 'ERR_NETWORK' || !err?.response) {
+        setError('Connection issue. Please check your internet and try again.')
+      } else {
+        setError('Invalid email or password. Please try again.')
+      }
     }
   }
 
@@ -207,7 +206,7 @@ export default function Home() {
               </div>
 
               {error && (
-                <p style={{ color: '#f87171', fontSize: '12px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px', wordBreak: 'break-word' }}>{error}</p>
+                <p style={{ color: '#f87171', fontSize: '13px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px' }}>{error}</p>
               )}
 
               <button type="submit" className="signin-btn" disabled={loading} style={{
