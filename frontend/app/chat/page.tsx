@@ -287,7 +287,7 @@ export default function ChatPage() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
+                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Chat with GyanSetu...'}
                       className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
                     />
                     <MicButton />
