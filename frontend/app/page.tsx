@@ -10,6 +10,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
+  const [demoMessage, setDemoMessage] = useState('')
 
   const doLogin = async (loginEmail: string, loginPassword: string) => {
     setError('')
@@ -39,8 +40,14 @@ export default function Home() {
 
   const handleTryDemo = async () => {
     setDemoLoading(true)
+    setDemoMessage('Waking up server...')
+    const wakeupTimer = setTimeout(() => {
+      setDemoMessage('Almost there, free server is waking up...')
+    }, 3000)
     await doLogin('rohit.student@gyansetu.com', 'rohit123')
+    clearTimeout(wakeupTimer)
     setDemoLoading(false)
+    setDemoMessage('')
   }
 
   return (
@@ -64,10 +71,8 @@ export default function Home() {
         .signin-btn:active { transform: translateY(0); }
         .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(20,184,166,0.35); }
         .demo-btn:active { transform: translateY(0); }
-        .google-btn:hover { background: rgba(139,92,246,0.1) !important; border-color: #8B5CF6 !important; }
         .finput:hover { background: rgba(55,65,81,0.7) !important; border-color: rgba(139,92,246,0.5) !important; }
         .finput:focus { outline: none; background: rgba(55,65,81,0.9) !important; border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
-        .forgot-link:hover { color: #FBBF24; }
         @media (max-width: 1024px) {
           .login-wrapper { grid-template-columns: 1fr !important; overflow-y: auto !important; height: auto !important; }
           .hero-section { min-height: 300px !important; justify-content: flex-start !important; padding-top: 80px !important; }
@@ -154,7 +159,7 @@ export default function Home() {
                 transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 opacity: demoLoading ? 0.7 : 1
               }}>
-              {demoLoading ? 'Loading demo...' : '✨ Try Demo'}
+              {demoLoading ? demoMessage : '✨ Try Demo'}
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0 24px' }}>
@@ -181,7 +186,7 @@ export default function Home() {
                   style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.5)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
               </div>
 
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#E5E7EB', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Password</label>
                 <input
                   type="password"
@@ -197,12 +202,11 @@ export default function Home() {
                   style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.5)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '12px 0 24px', fontSize: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', margin: '12px 0 24px', fontSize: '12px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9CA3AF', cursor: 'pointer' }}>
                   <input type="checkbox" style={{ width: '14px', height: '14px', accentColor: '#8B5CF6' }} />
                   Remember me
                 </label>
-                <a href="#" className="forgot-link" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }}>Forgot password?</a>
               </div>
 
               {error && (
@@ -216,24 +220,9 @@ export default function Home() {
                 fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s ease', textTransform: 'uppercase', letterSpacing: '0.5px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                marginBottom: '12px', opacity: loading ? 0.7 : 1
+                opacity: loading ? 0.7 : 1
               }}>
                 {loading ? 'Signing in...' : 'Sign In →'}
-              </button>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '16px 0' }}>
-                <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
-                <span style={{ fontSize: '11px', color: '#6B7280', textTransform: 'uppercase' }}>Or continue with</span>
-                <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
-              </div>
-
-              <button type="button" className="google-btn" style={{
-                width: '100%', padding: '10px 12px', background: 'transparent',
-                border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px',
-                color: '#E5E7EB', fontSize: '13px', cursor: 'pointer',
-                transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-              }}>
-                🔵 Continue with Google
               </button>
             </form>
           </div>

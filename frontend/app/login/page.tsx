@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
+  const [demoMessage, setDemoMessage] = useState('')
 
   const doLogin = async (loginEmail: string, loginPassword: string) => {
     setError('')
@@ -35,8 +36,14 @@ export default function LoginPage() {
 
   const handleTryDemo = async () => {
     setDemoLoading(true)
+    setDemoMessage('Waking up server...')
+    const wakeupTimer = setTimeout(() => {
+      setDemoMessage('Almost there, free server is waking up...')
+    }, 3000)
     await doLogin('rohit.student@gyansetu.com', 'rohit123')
+    clearTimeout(wakeupTimer)
     setDemoLoading(false)
+    setDemoMessage('')
   }
 
   return (
@@ -54,7 +61,6 @@ export default function LoginPage() {
         .login-btn:active { transform: translateY(0); }
         .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(20,184,166,0.35); }
         .demo-btn:active { transform: translateY(0); }
-        .google-btn:hover { background: rgba(139,92,246,0.1) !important; border-color: #8B5CF6 !important; }
         .linput:hover { background: rgba(55,65,81,0.8) !important; border-color: rgba(139,92,246,0.5) !important; }
         .linput:focus { outline: none; background: rgba(55,65,81,0.9) !important; border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
       `}</style>
@@ -86,7 +92,6 @@ export default function LoginPage() {
             <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>GenAI-powered ERP Copilot</p>
           </div>
 
-          {/* Try Demo button — one click, no visible credentials */}
           <button
             type="button"
             className="demo-btn"
@@ -100,7 +105,7 @@ export default function LoginPage() {
               transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               opacity: demoLoading ? 0.7 : 1
             }}>
-            {demoLoading ? 'Loading demo...' : '✨ Try Demo'}
+            {demoLoading ? demoMessage : '✨ Try Demo'}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0 24px' }}>
@@ -127,7 +132,7 @@ export default function LoginPage() {
                 style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.6)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
             </div>
 
-            <div style={{ marginBottom: '8px' }}>
+            <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#E5E7EB', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Password</label>
               <input
                 type="password"
@@ -143,12 +148,11 @@ export default function LoginPage() {
                 style={{ width: '100%', padding: '12px 14px', background: 'rgba(55,65,81,0.6)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: '#E5E7EB', fontSize: '14px', transition: 'all 0.3s ease', boxSizing: 'border-box' }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '12px 0 24px', fontSize: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', margin: '12px 0 24px', fontSize: '12px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9CA3AF', cursor: 'pointer' }}>
                 <input type="checkbox" style={{ width: '14px', height: '14px', accentColor: '#8B5CF6' }} />
                 Remember me
               </label>
-              <a href="#" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 600 }}>Forgot password?</a>
             </div>
 
             {error && (
@@ -161,30 +165,11 @@ export default function LoginPage() {
               color: 'white', border: 'none', borderRadius: '8px',
               fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease', textTransform: 'uppercase', letterSpacing: '0.5px',
-              marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               opacity: loading ? 0.7 : 1
             }}>
               {loading ? 'Signing in...' : 'Sign In →'}
             </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
-              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
-              <span style={{ fontSize: '11px', color: '#6B7280', textTransform: 'uppercase' }}>Or continue with</span>
-              <div style={{ flex: 1, height: '0.5px', background: 'rgba(139,92,246,0.2)' }} />
-            </div>
-
-            <button type="button" className="google-btn" style={{
-              width: '100%', padding: '10px 12px', background: 'transparent',
-              border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px',
-              color: '#E5E7EB', fontSize: '13px', cursor: 'pointer',
-              transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-            }}>
-              🔵 Continue with Google
-            </button>
-
-            <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(139,92,246,0.1)', fontSize: '13px', color: '#9CA3AF' }}>
-              Don't have an account? <a href="#" style={{ color: '#F59E0B', textDecoration: 'none', fontWeight: 700 }}>Create one here</a>
-            </div>
           </form>
         </div>
       </div>
