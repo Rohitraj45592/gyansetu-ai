@@ -58,35 +58,12 @@ Built as a full-stack project to demonstrate real-world skills: authentication, 
 
 ## 📸 Screenshots
 
+<!-- Add screenshots here — drag and drop images into this section on GitHub, or use:
 <p align="center">
-  <img src="screenshots/dashboard.png" width="800" alt="Dashboard" /><br/>
-  <em>Dashboard — attendance health, marks overview, and subject breakdown</em>
+  <img src="screenshots/dashboard.png" width="800" alt="Dashboard" />
+  <img src="screenshots/chat.png" width="800" alt="AI Chat" />
 </p>
-
-<p align="center">
-  <img src="screenshots/chat.png" width="800" alt="AI Chat" /><br/>
-  <em>AI Chat — ask questions about your academic data in natural language</em>
-</p>
-
-<p align="center">
-  <img src="screenshots/attendance.png" width="800" alt="Attendance" /><br/>
-  <em>Attendance — subject-wise breakdown with safe/low indicators</em>
-</p>
-
-<p align="center">
-  <img src="screenshots/marks.png" width="800" alt="Marks" /><br/>
-  <em>Marks — Internal 1, Internal 2, and External scores per subject</em>
-</p>
-
-<p align="center">
-  <img src="screenshots/timetable.png" width="800" alt="Timetable" /><br/>
-  <em>Timetable — weekly class schedule</em>
-</p>
-
-<p align="center">
-  <img src="screenshots/login.png" width="800" alt="Login" /><br/>
-  <em>Login — one-click demo access for recruiters</em>
-</p>
+-->
 
 ## 🧠 How the AI Chat Works
 
@@ -141,3 +118,4 @@ Create a `.env` file in `backend/` with your Supabase and OpenRouter credentials
 ## 📬 Connect
 
 Built by **Rohit Raj** — feel free to reach out or open an issue if you spot something!
+
