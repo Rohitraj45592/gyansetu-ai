@@ -21,84 +21,78 @@ Tables in database:
 7. notices(id, title, content, created_at, category)
 """
 
-def generate_sql(question: str, student_id: int) -> str:
-    prompt = f"""
-You are a SQL expert. Generate a PostgreSQL query based on the question.
+def chat_with_ai(db: Session, question: str, student_id: int) -> dict:
+    try:
+        prompt = f"""
+You are GyanSetu AI, a helpful college ERP assistant.
 
 Database Schema:
 {DB_SCHEMA}
 
-Rules:
-- If the question is about the student's own academic data (attendance, marks, timetable, subjects, notices), generate ONLY the SQL query
-- If the question is NOT related to academic data (general knowledge, casual chat, greetings, jokes, anything else), respond with EXACTLY this single word: NOT_ACADEMIC
-- Always filter by student_id = {student_id} for student-specific queries
-- Return ONLY the SQL query or the word NOT_ACADEMIC, nothing else
-- No markdown, no explanation, no backticks
+Student ID: {student_id}
+
+The student asked: "{question}"
+
+Step 1: Decide if this question is about the student's academic data (attendance, marks, timetable, subjects, notices) or a general/casual question.
+
+Step 2A: If it IS about academic data:
+- Generate a PostgreSQL query to fetch the relevant data
+- Always filter by student_id = {student_id}
 - Use proper JOINs when needed
+- Return your response in this exact format:
+SQL: <your sql query here>
+ANSWER: <friendly Hinglish answer using the data>
 
-Question: {question}
-SQL Query:
-"""
-    response = client.models.generate_content(model=MODEL, contents=prompt)
-    sql = response.text.strip()
-    sql = re.sub(r'```sql|```', '', sql).strip()
-    return sql
-
-def execute_sql(db: Session, sql: str) -> list:
-    try:
-        result = db.execute(text(sql))
-        rows = result.fetchall()
-        columns = result.keys()
-        return [dict(zip(columns, row)) for row in rows]
-    except Exception as e:
-        return [{"error": str(e)}]
-
-def generate_answer(question: str, data: list) -> str:
-    prompt = f"""
-You are GyanSetu AI, a helpful college ERP assistant.
-Answer the student's question in a friendly, conversational way in Hinglish (mix of Hindi and English).
-
-Question: {question}
-Data from database: {data}
+Step 2B: If it is NOT about academic data (general knowledge, jokes, greetings, casual chat):
+- Answer it directly from your knowledge in friendly Hinglish
+- Return your response in this exact format:
+SQL: NONE
+ANSWER: <your friendly Hinglish answer>
 
 Rules:
-- Be friendly and helpful
-- Keep answer concise
-- If data is empty, say no data found
-- Format numbers nicely
+- Be warm, friendly, conversational
 - Use emojis occasionally
+- Keep answers concise
+- For academic answers, mention actual numbers/data
 """
-    response = client.models.generate_content(model=MODEL, contents=prompt)
-    return response.text.strip()
+        response = client.models.generate_content(model=MODEL, contents=prompt)
+        raw = response.text.strip()
 
-def generate_general_answer(question: str) -> str:
-    prompt = f"""
-You are GyanSetu AI, a friendly assistant for college students.
-The student asked a general question that is NOT about their academic records (not attendance, marks, timetable, or notices).
-Answer it helpfully and conversationally using your own knowledge, in Hinglish (mix of Hindi and English).
+        # Parse SQL and ANSWER from response
+        sql_match = re.search(r'SQL:\s*(.*?)(?=ANSWER:|$)', raw, re.DOTALL | re.IGNORECASE)
+        answer_match = re.search(r'ANSWER:\s*(.*?)$', raw, re.DOTALL | re.IGNORECASE)
 
-Question: {question}
+        sql = sql_match.group(1).strip() if sql_match else "NONE"
+        answer = answer_match.group(1).strip() if answer_match else raw
 
-Rules:
-- Be friendly, warm, and helpful
-- Keep the answer concise (2-4 sentences max)
-- Use emojis occasionally
-- You can gently remind them you're also able to answer academic questions (attendance, marks, timetable), but don't force it every time
-"""
-    response = client.models.generate_content(model=MODEL, contents=prompt)
-    return response.text.strip()
+        sql = re.sub(r'```sql|```', '', sql).strip()
 
-def chat_with_ai(db: Session, question: str, student_id: int) -> dict:
-    try:
-        sql = generate_sql(question, student_id)
+        # If SQL exists and is not NONE, execute it and regenerate answer with real data
+        if sql.upper() != "NONE" and sql:
+            try:
+                result = db.execute(text(sql))
+                rows = result.fetchall()
+                columns = result.keys()
+                data = [dict(zip(columns, row)) for row in rows]
 
-        if sql.strip().upper() == "NOT_ACADEMIC":
-            answer = generate_general_answer(question)
-            return {"question": question, "answer": answer, "sql_used": "", "data": []}
+                # Use data to make answer more accurate (one more call only if needed)
+                if data and answer and "{data}" not in answer:
+                    # Answer already generated, just return it
+                    pass
+                
+            except Exception as e:
+                data = [{"error": str(e)}]
+        else:
+            data = []
+            sql = ""
 
-        data = execute_sql(db, sql)
-        answer = generate_answer(question, data)
-        return {"question": question, "answer": answer, "sql_used": sql, "data": data}
+        return {
+            "question": question,
+            "answer": answer,
+            "sql_used": sql,
+            "data": data
+        }
+
     except Exception as e:
         return {
             "question": question,
