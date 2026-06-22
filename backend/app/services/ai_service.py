@@ -1,4 +1,4 @@
-from openai import OpenAI
+from google import genai
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from dotenv import load_dotenv
@@ -7,10 +7,8 @@ import re
 
 load_dotenv()
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+MODEL = "gemini-2.5-flash"
 
 DB_SCHEMA = """
 Tables in database:
@@ -41,11 +39,8 @@ Rules:
 Question: {question}
 SQL Query:
 """
-    response = client.chat.completions.create(
-        model="google/gemma-4-31b-it:free",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    sql = response.choices[0].message.content.strip()
+    response = client.models.generate_content(model=MODEL, contents=prompt)
+    sql = response.text.strip()
     sql = re.sub(r'```sql|```', '', sql).strip()
     return sql
 
@@ -73,11 +68,8 @@ Rules:
 - Format numbers nicely
 - Use emojis occasionally
 """
-    response = client.chat.completions.create(
-        model="google/gemma-4-31b-it:free",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content.strip()
+    response = client.models.generate_content(model=MODEL, contents=prompt)
+    return response.text.strip()
 
 def generate_general_answer(question: str) -> str:
     prompt = f"""
@@ -93,11 +85,8 @@ Rules:
 - Use emojis occasionally
 - You can gently remind them you're also able to answer academic questions (attendance, marks, timetable), but don't force it every time
 """
-    response = client.chat.completions.create(
-        model="google/gemma-4-31b-it:free",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content.strip()
+    response = client.models.generate_content(model=MODEL, contents=prompt)
+    return response.text.strip()
 
 def chat_with_ai(db: Session, question: str, student_id: int) -> dict:
     try:
@@ -105,21 +94,11 @@ def chat_with_ai(db: Session, question: str, student_id: int) -> dict:
 
         if sql.strip().upper() == "NOT_ACADEMIC":
             answer = generate_general_answer(question)
-            return {
-                "question": question,
-                "answer": answer,
-                "sql_used": "",
-                "data": []
-            }
+            return {"question": question, "answer": answer, "sql_used": "", "data": []}
 
         data = execute_sql(db, sql)
         answer = generate_answer(question, data)
-        return {
-            "question": question,
-            "answer": answer,
-            "sql_used": sql,
-            "data": data
-        }
+        return {"question": question, "answer": answer, "sql_used": sql, "data": data}
     except Exception as e:
         return {
             "question": question,
