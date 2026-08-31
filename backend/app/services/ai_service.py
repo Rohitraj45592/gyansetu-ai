@@ -12,7 +12,7 @@ client = OpenAI(
     api_key=os.getenv("GROQ_API_KEY"),
 )
 
-MODEL = MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-4-scout"
 
 DB_SCHEMA = """
 Tables in database:
