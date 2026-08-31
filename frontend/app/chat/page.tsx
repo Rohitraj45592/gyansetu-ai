@@ -114,7 +114,7 @@ export default function ChatPage() {
 
     try {
       const studentId = localStorage.getItem('student_id') || '1'
-      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/chat/', {
+      const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/', {
         question: text,
         student_id: parseInt(studentId)
       })

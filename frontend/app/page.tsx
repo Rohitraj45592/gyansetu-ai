@@ -15,7 +15,7 @@ export default function Home() {
   const doLogin = async (loginEmail: string, loginPassword: string) => {
     setError('')
     try {
-      const res = await axios.post('https://gyansetu-ai-production.up.railway.app/auth/login', {
+      const res = await axios.post('https://gyansetu-ai-backend.onrender.com/auth/login', {
         email: loginEmail.trim().toLowerCase(),
         password: loginPassword.trim()
       })

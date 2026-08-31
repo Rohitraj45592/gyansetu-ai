@@ -51,7 +51,7 @@ Built as a full-stack project to demonstrate real-world skills: authentication, 
 | | |
 |---|---|
 | **App** | [gyansetu-ai-obxu.vercel.app](https://gyansetu-ai-obxu.vercel.app) |
-| **API** | [gyansetu-ai-production.up.railway.app](https://gyansetu-ai-production.up.railway.app) |
+| **API** | [gyansetu-ai-backend.onrender.com](https://gyansetu-ai-backend.onrender.com) |
 | **Quick access** | Click **"Try Demo"** on the login page — no signup needed |
 
 > **Note:** The backend runs on a free-tier server, which goes to sleep after inactivity. The first request after a while may take 5–10 seconds while the server wakes up — the UI shows a loading message during this time.

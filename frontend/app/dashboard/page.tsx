@@ -26,8 +26,8 @@ export default function DashboardPage() {
     try {
       const studentId = localStorage.getItem('student_id') || '1'
       const [attRes, marksRes] = await Promise.all([
-        axios.get(`https://gyansetu-ai-production.up.railway.app/attendance/${studentId}`),
-        axios.get(`https://gyansetu-ai-production.up.railway.app/marks/${studentId}`)
+        axios.get(`https://gyansetu-ai-backend.onrender.com/attendance/${studentId}`),
+        axios.get(`https://gyansetu-ai-backend.onrender.com/marks/${studentId}`)
       ])
       setAttendance(attRes.data.attendance || [])
       setMarks(marksRes.data.marks || [])
