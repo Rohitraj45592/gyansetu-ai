@@ -2,9 +2,9 @@
 import ReactMarkdown from 'react-markdown'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
-import { Send, Lightbulb, User, Mic, MicOff } from 'lucide-react'
+import { Send, Lightbulb, User, Mic, MicOff, Plus, Camera, Image, FileText, X } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 
 interface Message {
@@ -28,10 +28,14 @@ export default function ChatPage() {
   const [greeting, setGreeting] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [micSupported, setMicSupported] = useState(true)
+  const [showAttachMenu, setShowAttachMenu] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -48,7 +52,6 @@ export default function ChatPage() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Setup speech recognition once
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
@@ -59,7 +62,7 @@ export default function ChatPage() {
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = true
-    recognition.lang = 'hi-IN' // Hindi-India locale also understands English well on most devices
+    recognition.lang = 'hi-IN'
 
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results)
@@ -68,24 +71,28 @@ export default function ChatPage() {
       setInput(transcript)
     }
 
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.onerror = () => {
-      setIsListening(false)
-    }
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
 
     recognitionRef.current = recognition
-
-    return () => {
-      recognition.stop()
-    }
+    return () => recognition.stop()
   }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  // Close attach menu when clicking outside
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.attach-menu-wrapper')) {
+        setShowAttachMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   const toggleMic = () => {
     if (!micSupported || !recognitionRef.current) return
@@ -98,6 +105,37 @@ export default function ChatPage() {
       setIsListening(true)
     }
   }
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setShowAttachMenu(false)
+    // Show filename in input as context
+    setInput(`[File: ${file.name}] `)
+    // Reset input so same file can be selected again
+    e.target.value = ''
+  }
+
+  const attachOptions = [
+    {
+      icon: Camera,
+      label: 'Camera',
+      color: '#a78bfa',
+      action: () => { setShowAttachMenu(false); cameraInputRef.current?.click() }
+    },
+    {
+      icon: Image,
+      label: 'Photos',
+      color: '#60a5fa',
+      action: () => { setShowAttachMenu(false); photoInputRef.current?.click() }
+    },
+    {
+      icon: FileText,
+      label: 'Files',
+      color: '#4ade80',
+      action: () => { setShowAttachMenu(false); fileInputRef.current?.click() }
+    },
+  ]
 
   const suggestions = [
     'Mera attendance dikhao',
@@ -128,7 +166,6 @@ export default function ChatPage() {
 
   const isEmpty = messages.length === 0
 
-  // Generate stars with fixed positions (stable across re-renders)
   const stars = Array.from({ length: 60 }, (_, i) => ({
     id: i,
     left: (i * 37 + 13) % 100,
@@ -149,7 +186,7 @@ export default function ChatPage() {
       type="button"
       onClick={toggleMic}
       disabled={!micSupported}
-      title={!micSupported ? 'Voice input not supported on this browser' : isListening ? 'Stop listening' : 'Speak your question'}
+      title={!micSupported ? 'Voice input not supported' : isListening ? 'Stop listening' : 'Speak your question'}
       className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
         isListening
           ? 'text-red-400 bg-red-500/10 animate-pulse'
@@ -159,6 +196,58 @@ export default function ChatPage() {
       }`}>
       {isListening ? <MicOff size={size} /> : <Mic size={size} />}
     </button>
+  )
+
+  // Plus button + attach popup (reused in all 3 input bars)
+  const AttachButton = () => (
+    <div className="attach-menu-wrapper relative flex-shrink-0">
+      {/* Hidden file inputs */}
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelected} />
+      <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelected} />
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
+
+      {/* Popup menu */}
+      <AnimatePresence>
+        {showAttachMenu && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-12 left-0 z-50 rounded-2xl overflow-hidden"
+            style={{
+              background: '#1a1a2e',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              minWidth: '160px'
+            }}>
+            {attachOptions.map((opt, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={opt.action}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
+                style={{ borderBottom: i < attachOptions.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${opt.color}22` }}>
+                  <opt.icon size={16} style={{ color: opt.color }} />
+                </div>
+                <span className="text-sm text-white font-medium">{opt.label}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Plus button */}
+      <button
+        type="button"
+        onClick={() => setShowAttachMenu(prev => !prev)}
+        className="p-2 rounded-xl transition-all flex-shrink-0 text-gray-400 hover:text-white hover:bg-white/5">
+        {showAttachMenu ? <X size={18} /> : <Plus size={18} />}
+      </button>
+    </div>
   )
 
   return (
@@ -179,12 +268,8 @@ export default function ChatPage() {
       `}</style>
 
       <div className="min-h-screen flex overflow-x-hidden relative" style={{ backgroundColor: '#0a0a12' }}>
-        {/* Space background layer */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-          {/* Crescent moon */}
-          <svg
-            viewBox="0 0 100 100"
-            style={{ position: 'absolute', top: '8%', left: '78%', width: '70px', height: '70px', opacity: 0.85 }}>
+          <svg viewBox="0 0 100 100" style={{ position: 'absolute', top: '8%', left: '78%', width: '70px', height: '70px', opacity: 0.85 }}>
             <defs>
               <mask id="moonMask">
                 <circle cx="50" cy="50" r="38" fill="white" />
@@ -194,52 +279,29 @@ export default function ChatPage() {
             <circle cx="50" cy="50" r="38" fill="#e9e4f7" mask="url(#moonMask)" />
           </svg>
 
-          {/* Planets */}
           {planets.map((p, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                left: `${p.left}%`,
-                top: `${p.top}%`,
-                width: `${p.size}px`,
-                height: `${p.size}px`,
-                borderRadius: '50%',
-                background: `radial-gradient(circle at 35% 30%, ${p.color}, ${p.color}99 60%, transparent)`,
-                opacity: 0.55,
-              }}
-            />
+            <div key={i} style={{
+              position: 'absolute', left: `${p.left}%`, top: `${p.top}%`,
+              width: `${p.size}px`, height: `${p.size}px`, borderRadius: '50%',
+              background: `radial-gradient(circle at 35% 30%, ${p.color}, ${p.color}99 60%, transparent)`,
+              opacity: 0.55,
+            }} />
           ))}
 
-          {/* Stars */}
           {stars.map((s) => (
-            <div
-              key={s.id}
-              className="star-twinkle"
-              style={{
-                position: 'absolute',
-                left: `${s.left}%`,
-                top: `${s.top}%`,
-                width: `${s.size}px`,
-                height: `${s.size}px`,
-                borderRadius: '50%',
-                background: '#ffffff',
-                animationDelay: `${s.delay}s`,
-              }}
-            />
+            <div key={s.id} className="star-twinkle" style={{
+              position: 'absolute', left: `${s.left}%`, top: `${s.top}%`,
+              width: `${s.size}px`, height: `${s.size}px`,
+              borderRadius: '50%', background: '#ffffff',
+              animationDelay: `${s.delay}s`,
+            }} />
           ))}
 
-          {/* Comet trail - top-left to bottom-right */}
           <div className="comet-trail" style={{ position: 'absolute', top: 0, left: 0 }}>
-            <div
-              style={{
-                width: '3px',
-                height: '3px',
-                borderRadius: '50%',
-                background: '#fff',
-                boxShadow: '0 0 6px 2px rgba(255,255,255,0.8), -60px -28px 18px -10px rgba(167,139,250,0.5), -120px -56px 28px -14px rgba(167,139,250,0.25)',
-              }}
-            />
+            <div style={{
+              width: '3px', height: '3px', borderRadius: '50%', background: '#fff',
+              boxShadow: '0 0 6px 2px rgba(255,255,255,0.8), -60px -28px 18px -10px rgba(167,139,250,0.5), -120px -56px 28px -14px rgba(167,139,250,0.25)',
+            }} />
           </div>
         </div>
 
@@ -249,6 +311,7 @@ export default function ChatPage() {
 
           {isEmpty ? (
             <>
+              {/* Desktop empty state */}
               <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-10 -mt-10">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -282,6 +345,7 @@ export default function ChatPage() {
                   </div>
 
                   <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
+                    <AttachButton />
                     <input
                       ref={inputRef}
                       value={input}
@@ -292,10 +356,8 @@ export default function ChatPage() {
                     />
                     <MicButton />
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => sendMessage(input)}
-                      disabled={loading}
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                      onClick={() => sendMessage(input)} disabled={loading}
                       className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
                       style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                       <Send size={16} />
@@ -304,6 +366,7 @@ export default function ChatPage() {
                 </div>
               </div>
 
+              {/* Mobile empty state */}
               <div className="lg:hidden flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
                 <div className="flex flex-col items-center justify-center flex-1 px-4">
                   <motion.div
@@ -338,6 +401,7 @@ export default function ChatPage() {
                   </div>
 
                   <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
+                    <AttachButton />
                     <input
                       ref={mobileInputRef}
                       value={input}
@@ -348,10 +412,8 @@ export default function ChatPage() {
                     />
                     <MicButton />
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => sendMessage(input)}
-                      disabled={loading}
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                      onClick={() => sendMessage(input)} disabled={loading}
                       className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
                       style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                       <Send size={16} />
@@ -370,21 +432,17 @@ export default function ChatPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                     className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
-
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      msg.role === 'ai' ? '' : 'bg-white/10'
-                    }`}
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${msg.role === 'ai' ? '' : 'bg-white/10'}`}
                       style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
-                      {msg.role === 'ai'
-                        ? <Lightbulb size={14} className="text-white" />
-                        : <User size={14} className="text-gray-300" />}
+                      {msg.role === 'ai' ? <Lightbulb size={14} className="text-white" /> : <User size={14} className="text-gray-300" />}
                     </div>
-
-                    <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
-                      msg.role === 'ai'
-                        ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
-                        : 'text-white whitespace-pre-line'
-                    }`}
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
+                        msg.role === 'ai'
+                          ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
+                          : 'text-white whitespace-pre-line'
+                      }`}
                       style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
                       {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
                     </div>
@@ -392,10 +450,7 @@ export default function ChatPage() {
                 ))}
 
                 {loading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex gap-3 w-full sm:max-w-[85%]">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 w-full sm:max-w-[85%]">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                       <Lightbulb size={14} className="text-white" />
@@ -411,12 +466,12 @@ export default function ChatPage() {
                     </div>
                   </motion.div>
                 )}
-
                 <div ref={bottomRef} />
               </div>
 
               <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a12]/80 backdrop-blur-sm">
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/90 backdrop-blur-sm px-4 py-3 max-w-2xl mx-auto w-full">
+                  <AttachButton />
                   <input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -426,10 +481,8 @@ export default function ChatPage() {
                   />
                   <MicButton />
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => sendMessage(input)}
-                    disabled={loading}
+                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    onClick={() => sendMessage(input)} disabled={loading}
                     className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
                     style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                     <Send size={16} />
