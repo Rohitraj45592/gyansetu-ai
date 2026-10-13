@@ -69,3 +69,22 @@ class Notice(Base):
     content = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     category = Column(String)
+
+class AttendanceCorrectionRequest(Base):
+    __tablename__ = "attendance_corrections"
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=True)
+    student_name = Column(String, nullable=True)
+    roll_number = Column(String, nullable=True)
+    subject = Column(String, nullable=False)
+    attendance_date = Column(String, nullable=False)
+    class_period = Column(String, nullable=False)
+    faculty_name = Column(String, nullable=True)
+    reason = Column(Text, nullable=False)
+    evidence_reference = Column(String, nullable=True)
+    status = Column(String, default="Pending")  # Pending, Approved, Rejected
+    faculty_comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student = relationship("Student")

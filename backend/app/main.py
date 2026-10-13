@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.connection import engine
 from app.database import models
-from app.api import auth, attendance, marks, timetable, student, chat
+from app.api import auth, attendance, marks, timetable, student, chat, attendance_correction
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -26,6 +26,7 @@ app.include_router(marks.router)
 app.include_router(timetable.router)
 app.include_router(student.router)
 app.include_router(chat.router)
+app.include_router(attendance_correction.router)
 
 @app.get("/")
 def root():

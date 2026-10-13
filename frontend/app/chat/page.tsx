@@ -10,6 +10,8 @@ import Sidebar from '@/components/Sidebar'
 interface Message {
   role: 'user' | 'ai'
   text: string
+  image?: string
+  fileName?: string
 }
 
 const greetings = [
@@ -29,6 +31,11 @@ export default function ChatPage() {
   const [isListening, setIsListening] = useState(false)
   const [micSupported, setMicSupported] = useState(true)
   const [showAttachMenu, setShowAttachMenu] = useState(false)
+
+  // NAYA — file state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [filePreview, setFilePreview] = useState<string | null>(null)
+
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const mobileInputRef = useRef<HTMLInputElement>(null)
@@ -41,39 +48,26 @@ export default function ChatPage() {
     const token = localStorage.getItem('token')
     if (!token) router.push('/login')
     setGreeting(greetings[Math.floor(Math.random() * greetings.length)])
-
     const timer = setTimeout(() => {
-      if (window.innerWidth < 1024) {
-        mobileInputRef.current?.focus()
-      } else {
-        inputRef.current?.focus()
-      }
+      if (window.innerWidth < 1024) mobileInputRef.current?.focus()
+      else inputRef.current?.focus()
     }, 300)
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      setMicSupported(false)
-      return
-    }
-
+    if (!SpeechRecognition) { setMicSupported(false); return }
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = true
     recognition.lang = 'hi-IN'
-
     recognition.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0].transcript)
-        .join('')
+      const transcript = Array.from(event.results).map((r: any) => r[0].transcript).join('')
       setInput(transcript)
     }
-
     recognition.onend = () => setIsListening(false)
     recognition.onerror = () => setIsListening(false)
-
     recognitionRef.current = recognition
     return () => recognition.stop()
   }, [])
@@ -82,13 +76,9 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  // Close attach menu when clicking outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.attach-menu-wrapper')) {
-        setShowAttachMenu(false)
-      }
+      if (!(e.target as HTMLElement).closest('.attach-menu-wrapper')) setShowAttachMenu(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -96,43 +86,105 @@ export default function ChatPage() {
 
   const toggleMic = () => {
     if (!micSupported || !recognitionRef.current) return
-    if (isListening) {
-      recognitionRef.current.stop()
-      setIsListening(false)
-    } else {
-      setInput('')
-      recognitionRef.current.start()
-      setIsListening(true)
-    }
+    if (isListening) { recognitionRef.current.stop(); setIsListening(false) }
+    else { setInput(''); recognitionRef.current.start(); setIsListening(true) }
   }
 
+  // FIXED — file select hone pe preview set karo
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setShowAttachMenu(false)
-    // Show filename in input as context
-    setInput(`[File: ${file.name}] `)
-    // Reset input so same file can be selected again
+    setSelectedFile(file)
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = () => setFilePreview(reader.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      setFilePreview(null)
+    }
+
     e.target.value = ''
+  }
+
+  const clearFile = () => {
+    setSelectedFile(null)
+    setFilePreview(null)
+  }
+
+  // FIXED — sendMessage file bhi bhejta hai
+  const sendMessage = async (text: string) => {
+    if (!text.trim() && !selectedFile) return
+
+    const userMessage: Message = {
+      role: 'user',
+      text: text || `${selectedFile?.name} ke baare mein poochh raha hoon`,
+      image: filePreview || undefined,
+      fileName: !filePreview && selectedFile ? selectedFile.name : undefined,
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setInput('')
+    const fileCopy = selectedFile
+    clearFile()
+    setLoading(true)
+
+    try {
+      const studentId = localStorage.getItem('student_id') || '1'
+      let answer = ''
+
+      if (fileCopy && fileCopy.type.startsWith('image/')) {
+        const formData = new FormData()
+        formData.append('question', text || 'Is image ke baare mein bata')
+        formData.append('student_id', studentId)
+        formData.append('file', fileCopy)
+        const res = await axios.post(
+          'https://gyansetu-ai-backend.onrender.com/chat/image/',
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        )
+        answer = res.data.answer
+
+      } else if (fileCopy) {
+        const formData = new FormData()
+        formData.append('question', text || `${fileCopy.name} ke baare mein bata`)
+        formData.append('student_id', studentId)
+        formData.append('file', fileCopy)
+        const res = await axios.post(
+          'https://gyansetu-ai-backend.onrender.com/chat/file/',
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        )
+        answer = res.data.answer
+
+      } else {
+        const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/', {
+          question: text,
+          student_id: parseInt(studentId)
+        })
+        answer = res.data.answer
+      }
+
+      setMessages(prev => [...prev, { role: 'ai', text: answer }])
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, kuch problem aa gayi. Phir try karo! 😅' }])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const attachOptions = [
     {
-      icon: Camera,
-      label: 'Camera',
-      color: '#a78bfa',
+      icon: Camera, label: 'Camera', color: '#a78bfa',
       action: () => { setShowAttachMenu(false); cameraInputRef.current?.click() }
     },
     {
-      icon: Image,
-      label: 'Photos',
-      color: '#60a5fa',
+      icon: Image, label: 'Photos', color: '#60a5fa',
       action: () => { setShowAttachMenu(false); photoInputRef.current?.click() }
     },
     {
-      icon: FileText,
-      label: 'Files',
-      color: '#4ade80',
+      icon: FileText, label: 'Files', color: '#4ade80',
       action: () => { setShowAttachMenu(false); fileInputRef.current?.click() }
     },
   ]
@@ -144,34 +196,11 @@ export default function ChatPage() {
     '75% se kam attendance?',
   ]
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return
-    setMessages(prev => [...prev, { role: 'user', text }])
-    setInput('')
-    setLoading(true)
-
-    try {
-      const studentId = localStorage.getItem('student_id') || '1'
-      const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/', {
-        question: text,
-        student_id: parseInt(studentId)
-      })
-      setMessages(prev => [...prev, { role: 'ai', text: res.data.answer }])
-    } catch (err) {
-      setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, kuch problem aa gayi. Phir try karo! 😅' }])
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const isEmpty = messages.length === 0
 
   const stars = Array.from({ length: 60 }, (_, i) => ({
-    id: i,
-    left: (i * 37 + 13) % 100,
-    top: (i * 53 + 7) % 100,
-    size: (i % 3) + 1,
-    delay: (i % 5) * 0.6,
+    id: i, left: (i * 37 + 13) % 100, top: (i * 53 + 7) % 100,
+    size: (i % 3) + 1, delay: (i % 5) * 0.6,
   }))
 
   const planets = [
@@ -182,31 +211,48 @@ export default function ChatPage() {
   ]
 
   const MicButton = ({ size = 18 }: { size?: number }) => (
-    <button
-      type="button"
-      onClick={toggleMic}
-      disabled={!micSupported}
-      title={!micSupported ? 'Voice input not supported' : isListening ? 'Stop listening' : 'Speak your question'}
+    <button type="button" onClick={toggleMic} disabled={!micSupported}
       className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
-        isListening
-          ? 'text-red-400 bg-red-500/10 animate-pulse'
-          : micSupported
-          ? 'text-gray-400 hover:text-white hover:bg-white/5'
-          : 'text-gray-600 cursor-not-allowed'
+        isListening ? 'text-red-400 bg-red-500/10 animate-pulse'
+        : micSupported ? 'text-gray-400 hover:text-white hover:bg-white/5'
+        : 'text-gray-600 cursor-not-allowed'
       }`}>
       {isListening ? <MicOff size={size} /> : <Mic size={size} />}
     </button>
   )
 
-  // Plus button + attach popup (reused in all 3 input bars)
+  // NAYA — file preview bar input ke upar
+  const FilePreviewBar = () => {
+    if (!selectedFile) return null
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 6 }}
+        className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
+        style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
+        {filePreview ? (
+          <img src={filePreview} alt="preview" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(74,222,128,0.15)' }}>
+            <FileText size={18} className="text-green-400" />
+          </div>
+        )}
+        <span className="text-sm text-white/70 flex-1 truncate">{selectedFile.name}</span>
+        <button onClick={clearFile} className="text-white/30 hover:text-white/70 transition-colors flex-shrink-0">
+          <X size={16} />
+        </button>
+      </motion.div>
+    )
+  }
+
   const AttachButton = () => (
     <div className="attach-menu-wrapper relative flex-shrink-0">
-      {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelected} />
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelected} />
       <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
 
-      {/* Popup menu */}
       <AnimatePresence>
         {showAttachMenu && (
           <motion.div
@@ -216,20 +262,14 @@ export default function ChatPage() {
             transition={{ duration: 0.15 }}
             className="absolute bottom-12 left-0 z-50 rounded-2xl overflow-hidden"
             style={{
-              background: '#1a1a2e',
-              border: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              minWidth: '160px'
+              background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)', minWidth: '160px'
             }}>
             {attachOptions.map((opt, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={opt.action}
+              <button key={i} type="button" onClick={opt.action}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
                 style={{ borderBottom: i < attachOptions.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: `${opt.color}22` }}>
                   <opt.icon size={16} style={{ color: opt.color }} />
                 </div>
@@ -240,27 +280,49 @@ export default function ChatPage() {
         )}
       </AnimatePresence>
 
-      {/* Plus button */}
-      <button
-        type="button"
-        onClick={() => setShowAttachMenu(prev => !prev)}
+      <button type="button" onClick={() => setShowAttachMenu(prev => !prev)}
         className="p-2 rounded-xl transition-all flex-shrink-0 text-gray-400 hover:text-white hover:bg-white/5">
         {showAttachMenu ? <X size={18} /> : <Plus size={18} />}
       </button>
     </div>
   )
 
+  // NAYA — reusable input bar with preview
+  const InputBar = ({ refProp, placeholder }: {
+    refProp?: React.RefObject<HTMLInputElement | null>
+    placeholder: string
+  }) => (
+    <div className="w-full">
+      <AnimatePresence><FilePreviewBar /></AnimatePresence>
+      <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
+        <AttachButton />
+        <input
+          ref={refProp}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+          placeholder={isListening ? 'Sun raha hoon... bolo' : placeholder}
+          className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+        />
+        <MicButton />
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={() => sendMessage(input)} disabled={loading}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+          <Send size={16} />
+        </motion.button>
+      </div>
+    </div>
+  )
+
   return (
     <>
       <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.15; }
-          50% { opacity: 1; }
-        }
+        @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
         @keyframes comet {
           0% { transform: translate(-10vw, -10vh); opacity: 0; }
-          5% { opacity: 1; }
-          85% { opacity: 1; }
+          5% { opacity: 1; } 85% { opacity: 1; }
           100% { transform: translate(110vw, 110vh); opacity: 0; }
         }
         .star-twinkle { animation: twinkle 2.5s ease-in-out infinite; }
@@ -278,7 +340,6 @@ export default function ChatPage() {
             </defs>
             <circle cx="50" cy="50" r="38" fill="#e9e4f7" mask="url(#moonMask)" />
           </svg>
-
           {planets.map((p, i) => (
             <div key={i} style={{
               position: 'absolute', left: `${p.left}%`, top: `${p.top}%`,
@@ -287,7 +348,6 @@ export default function ChatPage() {
               opacity: 0.55,
             }} />
           ))}
-
           {stars.map((s) => (
             <div key={s.id} className="star-twinkle" style={{
               position: 'absolute', left: `${s.left}%`, top: `${s.top}%`,
@@ -296,7 +356,6 @@ export default function ChatPage() {
               animationDelay: `${s.delay}s`,
             }} />
           ))}
-
           <div className="comet-trail" style={{ position: 'absolute', top: 0, left: 0 }}>
             <div style={{
               width: '3px', height: '3px', borderRadius: '50%', background: '#fff',
@@ -311,7 +370,7 @@ export default function ChatPage() {
 
           {isEmpty ? (
             <>
-              {/* Desktop empty state */}
+              {/* Desktop */}
               <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-10 -mt-10">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -321,52 +380,26 @@ export default function ChatPage() {
                   <Lightbulb size={22} className="text-white" />
                 </motion.div>
                 <motion.h1
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-3xl font-semibold text-white text-center"
-                  style={{ marginBottom: '40px' }}>
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                  className="text-3xl font-semibold text-white text-center" style={{ marginBottom: '40px' }}>
                   {greeting}
                 </motion.h1>
-
                 <div className="w-full max-w-2xl">
                   <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '20px' }}>
                     {suggestions.map((s, i) => (
-                      <motion.button
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
+                      <motion.button key={i}
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                         onClick={() => sendMessage(s)}
                         className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                         {s}
                       </motion.button>
                     ))}
                   </div>
-
-                  <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
-                    <AttachButton />
-                    <input
-                      ref={inputRef}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Chat with GyanSetu...'}
-                      className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-                    />
-                    <MicButton />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      onClick={() => sendMessage(input)} disabled={loading}
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                      <Send size={16} />
-                    </motion.button>
-                  </div>
+                  <InputBar refProp={inputRef} placeholder="Chat with GyanSetu..." />
                 </div>
               </div>
 
-              {/* Mobile empty state */}
+              {/* Mobile */}
               <div className="lg:hidden flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
                 <div className="flex flex-col items-center justify-center flex-1 px-4">
                   <motion.div
@@ -377,48 +410,23 @@ export default function ChatPage() {
                     <Lightbulb size={20} className="text-white" />
                   </motion.div>
                   <motion.h1
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                     className="text-xl font-semibold text-white text-center">
                     {greeting}
                   </motion.h1>
                 </div>
-
                 <div className="px-4 pb-6" style={{ flexShrink: 0 }}>
                   <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '14px' }}>
                     {suggestions.map((s, i) => (
-                      <motion.button
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
+                      <motion.button key={i}
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                         onClick={() => sendMessage(s)}
                         className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                         {s}
                       </motion.button>
                     ))}
                   </div>
-
-                  <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
-                    <AttachButton />
-                    <input
-                      ref={mobileInputRef}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                      placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
-                      className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-                    />
-                    <MicButton />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      onClick={() => sendMessage(input)} disabled={loading}
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                      <Send size={16} />
-                    </motion.button>
-                  </div>
+                  <InputBar refProp={mobileInputRef} placeholder="Apna sawaal type karo..." />
                 </div>
               </div>
             </>
@@ -426,11 +434,8 @@ export default function ChatPage() {
             <>
               <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-6 pb-6 space-y-4">
                 {messages.map((msg, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                  <motion.div key={i}
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
                     className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${msg.role === 'ai' ? '' : 'bg-white/10'}`}
@@ -441,10 +446,27 @@ export default function ChatPage() {
                       className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
                         msg.role === 'ai'
                           ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
-                          : 'text-white whitespace-pre-line'
+                          : 'text-white'
                       }`}
                       style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
-                      {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
+
+                      {/* NAYA — image preview message mein */}
+                      {msg.image && (
+                        <img src={msg.image} alt="attachment"
+                          className="w-48 h-32 object-cover rounded-xl mb-2" />
+                      )}
+                      {/* NAYA — file badge message mein */}
+                      {msg.fileName && (
+                        <div className="flex items-center gap-2 mb-2 px-2 py-1 rounded-lg bg-white/10 w-fit">
+                          <FileText size={12} />
+                          <span className="text-xs">{msg.fileName}</span>
+                        </div>
+                      )}
+
+                      {msg.role === 'ai'
+                        ? <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        : <span className="whitespace-pre-line">{msg.text}</span>
+                      }
                     </div>
                   </motion.div>
                 ))}
@@ -457,8 +479,7 @@ export default function ChatPage() {
                     </div>
                     <div className="bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
                       {[0, 1, 2].map(i => (
-                        <motion.div
-                          key={i}
+                        <motion.div key={i}
                           animate={{ y: [0, -4, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
                           className="w-1.5 h-1.5 rounded-full bg-purple-400" />
@@ -470,23 +491,8 @@ export default function ChatPage() {
               </div>
 
               <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a12]/80 backdrop-blur-sm">
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/90 backdrop-blur-sm px-4 py-3 max-w-2xl mx-auto w-full">
-                  <AttachButton />
-                  <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-                    placeholder={isListening ? 'Sun raha hoon... bolo' : 'Apna sawaal type karo...'}
-                    className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-                  />
-                  <MicButton />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    onClick={() => sendMessage(input)} disabled={loading}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
-                    <Send size={16} />
-                  </motion.button>
+                <div className="max-w-2xl mx-auto w-full">
+                  <InputBar placeholder="Apna sawaal type karo..." />
                 </div>
               </div>
             </>

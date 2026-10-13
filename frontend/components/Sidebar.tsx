@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarCheck, GraduationCap, Clock,
-  MessageCircle, LogOut, PanelLeft, X
+  MessageCircle, ClipboardCheck, LogOut, PanelLeft, X
 } from 'lucide-react'
 
 export default function Sidebar() {
@@ -22,6 +22,7 @@ export default function Sidebar() {
     { icon: GraduationCap, label: 'Marks', path: '/marks' },
     { icon: Clock, label: 'Timetable', path: '/timetable' },
     { icon: MessageCircle, label: 'AI Chat', path: '/chat' },
+    { icon: ClipboardCheck, label: 'Attendance Correction', path: '/attendance-correction' },
   ]
 
   const handleNav = (path: string) => {
