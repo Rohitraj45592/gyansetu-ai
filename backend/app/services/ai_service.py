@@ -100,6 +100,33 @@ Rules:
     )
     return response.choices[0].message.content.strip()
 
+# ─── NAYA FUNCTION — file/image ke liye ──────────────────────
+def chat_with_file_context(question: str, extracted_content: str, file_name: str) -> str:
+    prompt = f"""
+You are GyanSetu AI, a helpful college ERP assistant.
+
+Student ne ek file share ki hai: "{file_name}"
+
+File ka content:
+{extracted_content}
+
+Student ka sawaal: {question}
+
+Instructions:
+- File ke content ko carefully analyze karo
+- Agar file academic hai (notes, question paper, assignment, syllabus) toh usse explain karo
+- Hinglish mein jawab do (Hindi + English mix)
+- Friendly tone rakho
+- Emojis occasionally use karo
+- Agar file content aur sawaal match nahi karta toh politely bata do
+"""
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content.strip()
+# ─────────────────────────────────────────────────────────────
+
 def chat_with_ai(db: Session, question: str, student_id: int) -> dict:
     try:
         sql = generate_sql(question, student_id)
