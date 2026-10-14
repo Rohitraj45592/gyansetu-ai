@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import { Send, Lightbulb, User, Mic, MicOff, Plus, Camera, Image, FileText, X } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
+import IntroAnimation from '@/components/IntroAnimation'
 
 interface Message {
   role: 'user' | 'ai'
@@ -31,10 +32,9 @@ export default function ChatPage() {
   const [isListening, setIsListening] = useState(false)
   const [micSupported, setMicSupported] = useState(true)
   const [showAttachMenu, setShowAttachMenu] = useState(false)
-
-  // NAYA — file state
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [filePreview, setFilePreview] = useState<string | null>(null)
+  const [showIntro, setShowIntro] = useState(false) // NAYA
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -44,9 +44,19 @@ export default function ChatPage() {
   const photoInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // UPDATED useEffect
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (!token) router.push('/login')
+    if (!token) {
+      router.push('/login')
+      return
+    }
+    // intro — sirf pehli baar login ke baad
+    const introSeen = sessionStorage.getItem('intro_seen')
+    if (!introSeen) {
+      setShowIntro(true)
+      sessionStorage.setItem('intro_seen', 'true')
+    }
     setGreeting(greetings[Math.floor(Math.random() * greetings.length)])
     const timer = setTimeout(() => {
       if (window.innerWidth < 1024) mobileInputRef.current?.focus()
@@ -90,13 +100,11 @@ export default function ChatPage() {
     else { setInput(''); recognitionRef.current.start(); setIsListening(true) }
   }
 
-  // FIXED — file select hone pe preview set karo
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setShowAttachMenu(false)
     setSelectedFile(file)
-
     if (file.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = () => setFilePreview(reader.result as string)
@@ -104,7 +112,6 @@ export default function ChatPage() {
     } else {
       setFilePreview(null)
     }
-
     e.target.value = ''
   }
 
@@ -113,59 +120,40 @@ export default function ChatPage() {
     setFilePreview(null)
   }
 
-  // FIXED — sendMessage file bhi bhejta hai
   const sendMessage = async (text: string) => {
     if (!text.trim() && !selectedFile) return
-
     const userMessage: Message = {
       role: 'user',
       text: text || `${selectedFile?.name} ke baare mein poochh raha hoon`,
       image: filePreview || undefined,
       fileName: !filePreview && selectedFile ? selectedFile.name : undefined,
     }
-
     setMessages(prev => [...prev, userMessage])
     setInput('')
     const fileCopy = selectedFile
     clearFile()
     setLoading(true)
-
     try {
       const studentId = localStorage.getItem('student_id') || '1'
       let answer = ''
-
       if (fileCopy && fileCopy.type.startsWith('image/')) {
         const formData = new FormData()
         formData.append('question', text || 'Is image ke baare mein bata')
         formData.append('student_id', studentId)
         formData.append('file', fileCopy)
-        const res = await axios.post(
-          'https://gyansetu-ai-backend.onrender.com/chat/image/',
-          formData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        )
+        const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/image/', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         answer = res.data.answer
-
       } else if (fileCopy) {
         const formData = new FormData()
         formData.append('question', text || `${fileCopy.name} ke baare mein bata`)
         formData.append('student_id', studentId)
         formData.append('file', fileCopy)
-        const res = await axios.post(
-          'https://gyansetu-ai-backend.onrender.com/chat/file/',
-          formData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        )
+        const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/file/', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         answer = res.data.answer
-
       } else {
-        const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/', {
-          question: text,
-          student_id: parseInt(studentId)
-        })
+        const res = await axios.post('https://gyansetu-ai-backend.onrender.com/chat/', { question: text, student_id: parseInt(studentId) })
         answer = res.data.answer
       }
-
       setMessages(prev => [...prev, { role: 'ai', text: answer }])
     } catch (err) {
       setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, kuch problem aa gayi. Phir try karo! 😅' }])
@@ -175,18 +163,9 @@ export default function ChatPage() {
   }
 
   const attachOptions = [
-    {
-      icon: Camera, label: 'Camera', color: '#a78bfa',
-      action: () => { setShowAttachMenu(false); cameraInputRef.current?.click() }
-    },
-    {
-      icon: Image, label: 'Photos', color: '#60a5fa',
-      action: () => { setShowAttachMenu(false); photoInputRef.current?.click() }
-    },
-    {
-      icon: FileText, label: 'Files', color: '#4ade80',
-      action: () => { setShowAttachMenu(false); fileInputRef.current?.click() }
-    },
+    { icon: Camera, label: 'Camera', color: '#a78bfa', action: () => { setShowAttachMenu(false); cameraInputRef.current?.click() } },
+    { icon: Image, label: 'Photos', color: '#60a5fa', action: () => { setShowAttachMenu(false); photoInputRef.current?.click() } },
+    { icon: FileText, label: 'Files', color: '#4ade80', action: () => { setShowAttachMenu(false); fileInputRef.current?.click() } },
   ]
 
   const suggestions = [
@@ -212,30 +191,21 @@ export default function ChatPage() {
 
   const MicButton = ({ size = 18 }: { size?: number }) => (
     <button type="button" onClick={toggleMic} disabled={!micSupported}
-      className={`p-2 rounded-xl transition-colors flex-shrink-0 ${
-        isListening ? 'text-red-400 bg-red-500/10 animate-pulse'
-        : micSupported ? 'text-gray-400 hover:text-white hover:bg-white/5'
-        : 'text-gray-600 cursor-not-allowed'
-      }`}>
+      className={`p-2 rounded-xl transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-500/10 animate-pulse' : micSupported ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-600 cursor-not-allowed'}`}>
       {isListening ? <MicOff size={size} /> : <Mic size={size} />}
     </button>
   )
 
-  // NAYA — file preview bar input ke upar
   const FilePreviewBar = () => {
     if (!selectedFile) return null
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 6 }}
+      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
         className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
         style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
         {filePreview ? (
           <img src={filePreview} alt="preview" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
         ) : (
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(74,222,128,0.15)' }}>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(74,222,128,0.15)' }}>
             <FileText size={18} className="text-green-400" />
           </div>
         )}
@@ -252,25 +222,16 @@ export default function ChatPage() {
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelected} />
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelected} />
       <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
-
       <AnimatePresence>
         {showAttachMenu && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: 10 }}
-            transition={{ duration: 0.15 }}
+          <motion.div initial={{ opacity: 0, scale: 0.85, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.85, y: 10 }} transition={{ duration: 0.15 }}
             className="absolute bottom-12 left-0 z-50 rounded-2xl overflow-hidden"
-            style={{
-              background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)', minWidth: '160px'
-            }}>
+            style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', minWidth: '160px' }}>
             {attachOptions.map((opt, i) => (
               <button key={i} type="button" onClick={opt.action}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
                 style={{ borderBottom: i < attachOptions.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${opt.color}22` }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${opt.color}22` }}>
                   <opt.icon size={16} style={{ color: opt.color }} />
                 </div>
                 <span className="text-sm text-white font-medium">{opt.label}</span>
@@ -279,7 +240,6 @@ export default function ChatPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       <button type="button" onClick={() => setShowAttachMenu(prev => !prev)}
         className="p-2 rounded-xl transition-all flex-shrink-0 text-gray-400 hover:text-white hover:bg-white/5">
         {showAttachMenu ? <X size={18} /> : <Plus size={18} />}
@@ -287,26 +247,17 @@ export default function ChatPage() {
     </div>
   )
 
-  // NAYA — reusable input bar with preview
-  const InputBar = ({ refProp, placeholder }: {
-    refProp?: React.RefObject<HTMLInputElement | null>
-    placeholder: string
-  }) => (
+  const InputBar = ({ refProp, placeholder }: { refProp?: React.RefObject<HTMLInputElement | null>; placeholder: string }) => (
     <div className="w-full">
       <AnimatePresence><FilePreviewBar /></AnimatePresence>
       <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#15151f]/85 backdrop-blur-md px-4 py-3">
         <AttachButton />
-        <input
-          ref={refProp}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+        <input ref={refProp} value={input} onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
           placeholder={isListening ? 'Sun raha hoon... bolo' : placeholder}
-          className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-        />
+          className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500" />
         <MicButton />
-        <motion.button
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
           onClick={() => sendMessage(input)} disabled={loading}
           className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
@@ -318,6 +269,11 @@ export default function ChatPage() {
 
   return (
     <>
+      {/* NAYA — intro animation */}
+      {showIntro && (
+        <IntroAnimation onComplete={() => setShowIntro(false)} />
+      )}
+
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
         @keyframes comet {
@@ -341,26 +297,13 @@ export default function ChatPage() {
             <circle cx="50" cy="50" r="38" fill="#e9e4f7" mask="url(#moonMask)" />
           </svg>
           {planets.map((p, i) => (
-            <div key={i} style={{
-              position: 'absolute', left: `${p.left}%`, top: `${p.top}%`,
-              width: `${p.size}px`, height: `${p.size}px`, borderRadius: '50%',
-              background: `radial-gradient(circle at 35% 30%, ${p.color}, ${p.color}99 60%, transparent)`,
-              opacity: 0.55,
-            }} />
+            <div key={i} style={{ position: 'absolute', left: `${p.left}%`, top: `${p.top}%`, width: `${p.size}px`, height: `${p.size}px`, borderRadius: '50%', background: `radial-gradient(circle at 35% 30%, ${p.color}, ${p.color}99 60%, transparent)`, opacity: 0.55 }} />
           ))}
           {stars.map((s) => (
-            <div key={s.id} className="star-twinkle" style={{
-              position: 'absolute', left: `${s.left}%`, top: `${s.top}%`,
-              width: `${s.size}px`, height: `${s.size}px`,
-              borderRadius: '50%', background: '#ffffff',
-              animationDelay: `${s.delay}s`,
-            }} />
+            <div key={s.id} className="star-twinkle" style={{ position: 'absolute', left: `${s.left}%`, top: `${s.top}%`, width: `${s.size}px`, height: `${s.size}px`, borderRadius: '50%', background: '#ffffff', animationDelay: `${s.delay}s` }} />
           ))}
           <div className="comet-trail" style={{ position: 'absolute', top: 0, left: 0 }}>
-            <div style={{
-              width: '3px', height: '3px', borderRadius: '50%', background: '#fff',
-              boxShadow: '0 0 6px 2px rgba(255,255,255,0.8), -60px -28px 18px -10px rgba(167,139,250,0.5), -120px -56px 28px -14px rgba(167,139,250,0.25)',
-            }} />
+            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#fff', boxShadow: '0 0 6px 2px rgba(255,255,255,0.8), -60px -28px 18px -10px rgba(167,139,250,0.5), -120px -56px 28px -14px rgba(167,139,250,0.25)' }} />
           </div>
         </div>
 
@@ -370,25 +313,20 @@ export default function ChatPage() {
 
           {isEmpty ? (
             <>
-              {/* Desktop */}
               <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-10 -mt-10">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                   className="w-14 h-14 rounded-full flex items-center justify-center"
                   style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)', marginBottom: '24px' }}>
                   <Lightbulb size={22} className="text-white" />
                 </motion.div>
-                <motion.h1
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                   className="text-3xl font-semibold text-white text-center" style={{ marginBottom: '40px' }}>
                   {greeting}
                 </motion.h1>
                 <div className="w-full max-w-2xl">
                   <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '20px' }}>
                     {suggestions.map((s, i) => (
-                      <motion.button key={i}
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+                      <motion.button key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                         onClick={() => sendMessage(s)}
                         className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                         {s}
@@ -399,18 +337,14 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* Mobile */}
               <div className="lg:hidden flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
                 <div className="flex flex-col items-center justify-center flex-1 px-4">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                  <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                     className="w-12 h-12 rounded-full flex items-center justify-center"
                     style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)', marginBottom: '16px' }}>
                     <Lightbulb size={20} className="text-white" />
                   </motion.div>
-                  <motion.h1
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                  <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                     className="text-xl font-semibold text-white text-center">
                     {greeting}
                   </motion.h1>
@@ -418,8 +352,7 @@ export default function ChatPage() {
                 <div className="px-4 pb-6" style={{ flexShrink: 0 }}>
                   <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: '14px' }}>
                     {suggestions.map((s, i) => (
-                      <motion.button key={i}
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+                      <motion.button key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                         onClick={() => sendMessage(s)}
                         className="text-sm px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all backdrop-blur-sm">
                         {s}
@@ -434,54 +367,32 @@ export default function ChatPage() {
             <>
               <div className="flex-1 overflow-y-auto px-4 sm:px-10 pt-6 pb-6 space-y-4">
                 {messages.map((msg, i) => (
-                  <motion.div key={i}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+                  <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
                     className={`flex gap-3 w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${msg.role === 'ai' ? '' : 'bg-white/10'}`}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${msg.role === 'ai' ? '' : 'bg-white/10'}`}
                       style={msg.role === 'ai' ? { background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' } : {}}>
                       {msg.role === 'ai' ? <Lightbulb size={14} className="text-white" /> : <User size={14} className="text-gray-300" />}
                     </div>
-                    <div
-                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${
-                        msg.role === 'ai'
-                          ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none'
-                          : 'text-white'
-                      }`}
+                    <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed min-w-0 ${msg.role === 'ai' ? 'bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] text-gray-200 shadow-sm prose prose-invert prose-sm max-w-none' : 'text-white'}`}
                       style={msg.role === 'user' ? { background: 'linear-gradient(135deg, #a78bfa, #c4b5fd)' } : {}}>
-
-                      {/* NAYA — image preview message mein */}
-                      {msg.image && (
-                        <img src={msg.image} alt="attachment"
-                          className="w-48 h-32 object-cover rounded-xl mb-2" />
-                      )}
-                      {/* NAYA — file badge message mein */}
+                      {msg.image && <img src={msg.image} alt="attachment" className="w-48 h-32 object-cover rounded-xl mb-2" />}
                       {msg.fileName && (
                         <div className="flex items-center gap-2 mb-2 px-2 py-1 rounded-lg bg-white/10 w-fit">
-                          <FileText size={12} />
-                          <span className="text-xs">{msg.fileName}</span>
+                          <FileText size={12} /><span className="text-xs">{msg.fileName}</span>
                         </div>
                       )}
-
-                      {msg.role === 'ai'
-                        ? <ReactMarkdown>{msg.text}</ReactMarkdown>
-                        : <span className="whitespace-pre-line">{msg.text}</span>
-                      }
+                      {msg.role === 'ai' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : <span className="whitespace-pre-line">{msg.text}</span>}
                     </div>
                   </motion.div>
                 ))}
-
                 {loading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 w-full sm:max-w-[85%]">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #a78bfa, #f59e0b)' }}>
                       <Lightbulb size={14} className="text-white" />
                     </div>
                     <div className="bg-[#15151f]/90 backdrop-blur-sm border border-white/[0.06] rounded-2xl px-4 py-3 shadow-sm flex items-center gap-1">
                       {[0, 1, 2].map(i => (
-                        <motion.div key={i}
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                        <motion.div key={i} animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
                           className="w-1.5 h-1.5 rounded-full bg-purple-400" />
                       ))}
                     </div>
@@ -489,7 +400,6 @@ export default function ChatPage() {
                 )}
                 <div ref={bottomRef} />
               </div>
-
               <div className="px-4 sm:px-10 py-5 border-t border-white/[0.06] bg-[#0a0a12]/80 backdrop-blur-sm">
                 <div className="max-w-2xl mx-auto w-full">
                   <InputBar placeholder="Apna sawaal type karo..." />
